@@ -16,7 +16,7 @@
 
 ### Install `sqlc` 
 
-- `sqlc` generates type-safe code from SQL. This is not a ORM or query builder.
+- `sqlc` generates type-safe code from SQL. This is not an ORM or query builder.
 You still need to write your own SQL query.
 - [How to install](https://docs.sqlc.dev/en/latest/overview/install.html) 
 
