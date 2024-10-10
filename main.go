@@ -49,9 +49,7 @@ func updateHelldiverFourVO(file string, db *sql.DB, logger *slog.Logger) error {
 
 	queryWithTx := dbQueries.WithTx(tx)
 
-	/** I know it's not great. ReadLine is doing a lot of overhead work. */
 	for {
-		/** Not accounting for lines is too long although it rare the case */
 		record, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
