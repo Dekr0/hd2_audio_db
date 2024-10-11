@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE helldiver_audio_archives (
+CREATE TABLE helldiver_audio_archive (
     id TEXT PRIMARY KEY,
     archive_id TEXT NOT NULL,
     tag TEXT NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE helldiver_audio_archives (
 );
 
 -- +goose Down
-DROP TABLE helldiver_audio_archives;
+DROP TABLE helldiver_audio_archive;
