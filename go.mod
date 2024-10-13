@@ -1,4 +1,4 @@
-module dekr0/fuzzy
+module dekr0/hd-audio-archive-db
 
 go 1.23.2
 
