@@ -24,13 +24,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) error {
-	if db == nil {
-		return errors.New("Database connection cannot be nil")
-	}
+func updateHelldiverFourVO(csvFile string, logger *slog.Logger) error {
 	if logger == nil {
 		return errors.New("Logger cannot be nil")
 	}
+	
+	dbPath := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
 	csvFileHandle, err := os.Open(csvFile)
 	if err != nil {
 		return err
@@ -44,7 +49,7 @@ func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) erro
 
 	dbQueries := database.New(db)
 
-	bgCtx := context.Background()
+	ctx := context.Background()
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -53,6 +58,13 @@ func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) erro
 	defer tx.Rollback()
 
 	queryWithTx := dbQueries.WithTx(tx)
+
+	if err = queryWithTx.DeleteAllHelldiverFourTranscription(ctx); err != nil {
+		return err
+	}
+	if err = queryWithTx.DeleteAllHelldiverFourVOFTSEntry(ctx); err != nil {
+		return err
+	}
 
 	for {
 		record, err := reader.Read()
@@ -104,7 +116,7 @@ func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) erro
 			FileID: record[0],
 			Transcription: record[1],
 		}
-		err = queryWithTx.CreateHelldiverFourTranscription(bgCtx, *params)
+		err = queryWithTx.CreateHelldiverFourTranscription(ctx, *params)
 		if err != nil {
 			return err
 		}
@@ -114,7 +126,7 @@ func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) erro
 			FileID: record[0],
 			Transcription: record[1],
 		}
-		err = queryWithTx.CreateHelldiverFourVOFTSEntry(bgCtx, *ftsParams)
+		err = queryWithTx.CreateHelldiverFourVOFTSEntry(ctx, *ftsParams)
 		if err != nil {
 			return err
 		}
@@ -133,10 +145,7 @@ func updateHelldiverFourVO(csvFile string, db *sql.DB, logger *slog.Logger) erro
 	return nil
 }
 
-func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) error {
-	if db == nil {
-		return errors.New("Database connection cannot be nil")
-	}
+func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 	if logger == nil {
 		return errors.New("Logger cannot be nil")
 	}
@@ -145,9 +154,15 @@ func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) e
 		return err
 	}
 
-	dbQueries := database.New(db)
+	dbPath := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
-	bgCtx := context.Background()
+	dbQueries := database.New(db)
+	ctx := context.Background()
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -156,6 +171,16 @@ func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) e
 	defer tx.Rollback()
 
 	queriesTx := dbQueries.WithTx(tx)
+
+	if err = queriesTx.DeleteAllHelldiverArchiveName(ctx); err != nil {
+		return err
+	}
+	if err = queriesTx.DeleteAllHelldiverAudioArchive(ctx); err != nil {
+		return err
+	}
+	if err = queriesTx.DeleteAllHelldiverAudioSource(ctx); err != nil {
+		return err
+	}
 
 	totalRecordCount := 0
 	perFileRecordCount := 0
@@ -210,7 +235,7 @@ func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) e
 				audioArchiveNameSet[audioArchiveName] = audioArchiveNameIdS
 				
 				if err = queriesTx.CreateHelldiverAudioArchiveName(
-					bgCtx,
+					ctx,
 					database.CreateHelldiverAudioArchiveNameParams{
 						AudioArchiveNameID: audioArchiveNameIdS,
 						AudioArchiveName: audioArchiveName,
@@ -243,7 +268,7 @@ func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) e
 				param.AudioArchiveID = audioArchiveId
 				param.AudioArchiveNameID = audioArchiveNameIdS
 				param.AudioArchiveCategory = audioArchiveCategory 
-				err = queriesTx.CreateHelldiverAudioArchive(bgCtx, *param)
+				err = queriesTx.CreateHelldiverAudioArchive(ctx, *param)
 				if err != nil {
 					return err
 				}
@@ -268,126 +293,177 @@ func updateHelldiverAudioArchives(dir string, db *sql.DB, logger *slog.Logger) e
 	return nil
 }
 
-func generateDependencyByArchiveId(db *sql.DB, queriedId string) error {
-	if db == nil {
-		return errors.New("Database connection cannot be nil")
+func generateDependencyByArchiveId(queriedId string) error {
+	dbPath := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
 	}
+	defer db.Close()
 
+	/** Validate audio archive ID */
 	dbQueries := database.New(db)
-
 	ctx := context.Background()
-
 	count, err := dbQueries.HasAudioArchiveID(ctx, queriedId)
 	if err != nil {
 		return err
 	}
 	if count == 0 {
-		err := fmt.Sprintf("Archive ID %s does not exist", queriedId)
-		return errors.New(err)
+		errMsg := fmt.Sprintf("Archive ID %s does not exist", queriedId)
+		return errors.New(errMsg)
 	}
 	if count != 1 {
 		return errors.New("Count should be exactly 1. Something wrong with the logic in CLI.")
 	}
+	/** End of validate audio archive ID */
 
+	/** Name mapping */
 	allAudioArchiveNames, err := dbQueries.QueryAllAudioArchiveName(ctx)
 	if err != nil {
 		return err
 	}
-
-	/** ID: NAME */
 	audioArchiveNameMap := make(map[string]string)
-
 	for _, e := range allAudioArchiveNames {
 		id, name := e.AudioArchiveNameID, e.AudioArchiveName
 		if _, in := audioArchiveNameMap[id]; !in {
 			audioArchiveNameMap[id] = name
 		} else {
-			err := fmt.Sprintf("Duplicating audio archive name id %s", id)
-			return errors.New(err)
+			errMsg := fmt.Sprintf("Duplicating audio archive name id %s", id)
+			return errors.New(errMsg)
 		}
 	}
-
 	allAudioArchiveNames = nil
+	/** End of name mapping */
+
+	sharedErr := make(chan error)
+	safeErr := make(chan error)
 
 	/** Shared audio sources */
-	sharedAudioSources, err := dbQueries.QueryAllSharedAudioSourceByAudioArchiveID(
-		ctx, sql.NullString{ String: queriedId, Valid: true },
-	)
-	filename := fmt.Sprintf("%s_shared.csv", queriedId)
-	audioSourcesCsv, err := os.OpenFile(
-		filename, 
-		os.O_RDWR | os.O_CREATE, 
-		0644,
-	)
-	if err != nil {
-		return err
-	}
-	writer := csv.NewWriter(audioSourcesCsv)
-	for _, e := range sharedAudioSources {
-		record := []string{ e.AudioSourceID }
-		for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
-			v, in := audioArchiveNameMap[n]
-			if !in {
-				err := fmt.Sprintf("Failed to locate audio archive name with ID %s", n)
-				return errors.New(err)
+	go func() {
+		conn, err := sql.Open("sqlite3", dbPath)
+		defer func() {
+			if conn != nil {
+				conn.Close()
 			}
-			record = append(record, v)
-		}
-		err = writer.Write(record)
+			sharedErr <- err
+		}()
 		if err != nil {
-			return err
+			return
 		}
-	}
-	writer.Flush()
-	audioSourcesCsv.Close()
-	/** End */
+
+		dbQueries := database.New(conn)
+		sharedAudioSources, err := dbQueries.QueryAllSharedAudioSourceByAudioArchiveID(
+			ctx, sql.NullString{ String: queriedId, Valid: true },
+		)
+
+		filename := fmt.Sprintf("%s_shared.csv", queriedId)
+		audioSourcesCsv, err := os.OpenFile(
+			filename, 
+			os.O_RDWR | os.O_CREATE, 
+			0644,
+		)
+		if err != nil {
+			return
+		}
+		writer := csv.NewWriter(audioSourcesCsv)
+		defer func() {
+			writer.Flush()
+			audioSourcesCsv.Close()
+		}()
+
+		for _, e := range sharedAudioSources {
+			record := []string{ e.AudioSourceID }
+			for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
+				v, in := audioArchiveNameMap[n]
+				if !in {
+					errMsg := fmt.Sprintf("Failed to locate audio archive name with ID %s", 
+						n)
+					err = errors.New(errMsg)
+					return
+				}
+				record = append(record, v)
+			}
+			err = writer.Write(record)
+			if err != nil {
+				return
+			}
+		}
+	}()
+	/** End of shared audio sources */
 
 	/** Safe (Non shared audio sources) */
-	safeAudioSources, err := dbQueries.QueryAllSafeAudioSourceByAudioArchiveID(
-		ctx, queriedId,
-	)
-	if err != nil {
-		return err
-	}
-	filename = fmt.Sprintf("%s_safe.csv", queriedId)
-	audioSourcesCsv, err = os.OpenFile(
-		filename, 
-		os.O_RDWR | os.O_CREATE, 
-		0644,
-	)
-	if err != nil {
-		return err
-	}
-	writer = csv.NewWriter(audioSourcesCsv)
-	for _, e := range safeAudioSources {
-		record := []string{ e.AudioSourceID }
-		for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
-			v, in := audioArchiveNameMap[n]
-			if !in {
-				err := fmt.Sprintf("Failed to locate audio archive name with ID %s", n)
-				return errors.New(err)
+	go func() {
+		conn, err := sql.Open("sqlite3", dbPath)
+		defer func() {
+			if conn != nil {
+				conn.Close()
 			}
-			record = append(record, v)
-		}
-		err = writer.Write(record)
-		if err != nil {
-			return err
-		}
-	}
-	writer.Flush()
-	audioSourcesCsv.Close()
-	/** End */
+			safeErr <- err
+		}()
 
-	return nil
+		safeAudioSources, err := dbQueries.QueryAllSafeAudioSourceByAudioArchiveID(
+			ctx, queriedId,
+		)
+		if err != nil {
+			return
+		}
+
+		filename := fmt.Sprintf("%s_safe.csv", queriedId)
+		audioSourcesCsv, err := os.OpenFile(
+			filename, 
+			os.O_RDWR | os.O_CREATE, 
+			0644,
+		)
+
+		if err != nil {
+			return
+		}
+
+		writer := csv.NewWriter(audioSourcesCsv)
+		defer func() {
+			writer.Flush()
+			audioSourcesCsv.Close()
+		}()
+		for _, e := range safeAudioSources {
+			record := []string{ e.AudioSourceID }
+			for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
+				v, in := audioArchiveNameMap[n]
+				if !in {
+					errMsg := fmt.Sprintf("Failed to locate audio archive name with ID %s", n)
+					err = errors.New(errMsg)
+					return
+				}
+				record = append(record, v)
+			}
+			err = writer.Write(record)
+			if err != nil {
+				return
+			}
+		}
+	}()
+	/** End of safe audio sources */
+
+	err = <- sharedErr
+	if err != nil {
+		err = errors.Join(err, <- safeErr)
+		return err
+	} else {
+		err = <- safeErr
+	}
+	return err 
 }
 
-func overwriteCheck(filename string, db *sql.DB, logger *slog.Logger) error {
-	if db == nil {
-		return errors.New("Database connection cannot be nil")
-	}
+func overwriteCheck(filename string, logger *slog.Logger) error {
 	if logger == nil {
 		return errors.New("Logger cannot be nil")
 	}
+
+	dbPath := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
 	dbQueries := database.New(db)
 	ctx := context.Background()
@@ -540,11 +616,7 @@ func overwriteCheck(filename string, db *sql.DB, logger *slog.Logger) error {
 	return nil
 }
 
-func cleanup(db *sql.DB, logger *slog.Logger, start time.Time, rcode int) {
-	if db != nil {
-		db.Close()
-	}
-
+func cleanup(logger *slog.Logger, start time.Time, rcode int) {
 	diff := time.Now().Sub(start)
 	logger.Info("CLI performance status", 
 		"trivial run time stats", diff.Milliseconds())
@@ -564,69 +636,84 @@ func main() {
 	logger := getLogger()(handler)
 
 	/** Initialize CLI flag definition */
-	initAudioArchive := flag.Bool("init_audio_archive", false, "")
-	initVO := flag.Bool("init_vo", false, "")
-	genDepAll := flag.Bool("gen_dep_all", false, "")
-	genDepByArchiveID := flag.String("gen_dep_archive_id", "", "")
-	overWriteCheckFile := flag.String("overwrite_check", "", "")
+	initAudioArchive := flag.Bool(
+		"init_audio_archive",
+		false,
+		"(enable / disable flag) Re-initialize the data for the audio archive database tables",
+	)
+	initVO := flag.Bool(
+		"init_vo",
+		false,
+		"(enable / disable flag) Re-initialize the data for voice line tables (Placeholder)",
+	)
+	genDepAll := flag.Bool(
+		"gen_dep_all",
+		false,
+		"(enable / disable flag) Generate all shared audio sources and potential safe audio sources for each audio archive id",
+	)
+	genDepByArchiveID := flag.String(
+		"gen_dep_archive_id",
+		"",
+		"(archive_id: string) Generate shared audio sources and potential safe audio sources for a provided audio archive id",
+	)
+	overWriteCheckFile := flag.String(
+		"overwrite_check",
+		"",
+		"(input_file_path: string) Perform audio source overwrite check",
+	)
 
 	flag.Parse()
-
-	dbPath := os.Getenv("DB_PATH")
-	db, err := sql.Open("sqlite3", dbPath)
-	if err != nil {
-		logger.Error("Error occur when opening SQLite database", 
-			"error", err.Error())
-		os.Exit(1)
-	}
-	defer db.Close()
 
 	rcode := 0
 	if *initAudioArchive || *initVO {
 		if *initVO {
-			if err := updateHelldiverFourVO("./csv/helldiver_four_vo.csv", 
-				db, logger); 
+			if err := updateHelldiverFourVO(
+				"./csv/helldiver_four_vo.csv", 
+				logger,
+			); 
 			err != nil {
 				logger.Error("Error occur when updating Helldiver Four VO into database", 
 					"error", err.Error())
 				rcode = 1
-				cleanup(db, logger, start, rcode)
+				cleanup(logger, start, rcode)
 			}
 		}
 
 		if *initAudioArchive {
-			if err := updateHelldiverAudioArchives("./csv/archives", db, logger); 
+			if err := updateHelldiverAudioArchives("./csv/archives", logger); 
 			err != nil {
 				logger.Error("Error occur when update Helldiver audio archives",
 					"error", err.Error())
 				rcode = 1
-				cleanup(db, logger, start, rcode)
+				cleanup(logger, start, rcode)
 			}
 		}
 
-		cleanup(db, logger, start, rcode)
+		cleanup(logger, start, rcode)
 	}
 
 	if len(*overWriteCheckFile) > 0 {
-		err := overwriteCheck(*overWriteCheckFile, db, logger)
+		err := overwriteCheck(*overWriteCheckFile, logger)
 		if err != nil {
 			logger.Error("Error occur when performing overwrite check")
 			rcode = 1
 		}
-		cleanup(db, logger, start, rcode)
+		cleanup(logger, start, rcode)
 	}
 
 	if *genDepAll {
-		cleanup(db, logger, start, rcode)
+		cleanup(logger, start, rcode)
 	}
 
 	if len(*genDepByArchiveID) > 0 {
-		err := generateDependencyByArchiveId(db, *genDepByArchiveID)
+		err := generateDependencyByArchiveId(*genDepByArchiveID)
 		if err != nil {
 			logger.Error("Error occur when generate dependency for the provided archive ID", 
 				"error", err)
 			rcode = 1
 		}
-		cleanup(db, logger, start, rcode)
+		cleanup(logger, start, rcode)
 	}
+
+	flag.CommandLine.Usage()
 }
