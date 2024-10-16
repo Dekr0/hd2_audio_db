@@ -1,0 +1,60 @@
+{
+    "rr_bass_01": "403515423",
+
+    "rr_mech_01": "964885064",
+    "rr_mech_02": "1022781945",
+    "rr_mech_03": "737335587",
+    "rr_mech_04": "978889842",
+    "rr_mech_05": "1066444302",
+    "rr_mech_06": "132044608",
+
+    "rr_tail_01": "29209415",
+    "rr_tail_02": "173488498",
+    "rr_tail_03": "447969471",
+    "rr_tail_04": "707872094",
+    "rr_tail_05": "717602197",
+
+    "rr_tube_tail_01": "661067657",
+    "rr_tube_tail_02": "881350522",
+    "rr_tube_tail_03": "250793479",
+    "rr_tube_tail_04": "251501562",
+    "rr_tube_tail_05": "896923314",
+
+    "rr_tube_start_01": "491849867",
+    "rr_tube_start_02": "1004774439",
+    "rr_tube_start_03": "318840185",
+    "rr_tube_start_04": "691453467",
+    "rr_tube_start_05": "28376105",
+
+    "rr_fetch_warhead_01": "584453627",
+    "rr_fetch_warhead_02": "979782962",
+    "rr_fetch_warhead_03": "364614370",
+
+    "rr_reload_warhead_eject_01": "267785761",
+    "rr_reload_warhead_eject_02": "1029881968",
+    "rr_reload_warhead_eject_03": "134239311",
+
+    "rr_reload_warhead_insert_01": "865556916",
+    "rr_reload_warhead_insert_02": "14917297",
+    "rr_reload_warhead_insert_03": "56667435",
+
+    "rr_reload_hatch_lock_clip_0_01": "26965555",
+    "rr_reload_hatch_lock_clip_0_02": "769016298",
+    "rr_reload_hatch_lock_clip_0_03": "746356134",
+
+    "rr_reload_hatch_close_01": "643162213",
+    "rr_reload_hatch_close_02": "731093107",
+    "rr_reload_hatch_close_03": "719210906",
+
+    "rr_reload_hatch_lock_clip_1_01": "711249715",
+    "rr_reload_hatch_lock_clip_1_02": "177818040",
+    "rr_reload_hatch_lock_clip_1_03": "878574263",
+
+    "rr_team_reload_full_01": "712574861",
+    "rr_team_reload_full_02": "1068570216",
+    "rr_team_reload_full_03": "399225491",
+
+    "rr_reload_hatch_open_01": "1018262330",
+    "rr_reload_hatch_open_02": "70883559",
+    "rr_reload_hatch_open_03": "11136157"
+}
