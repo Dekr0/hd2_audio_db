@@ -356,8 +356,8 @@ func generateDependencyByArchiveId(queriedId string) error {
 			ctx, sql.NullString{ String: queriedId, Valid: true },
 		)
 
-		filename := fmt.Sprintf("%s_shared.csv", queriedId)
-		audioSourcesCsv, err := os.OpenFile(
+		filename := fmt.Sprintf("%s_shared.json", queriedId)
+		dataFile, err := os.OpenFile(
 			filename, 
 			os.O_RDWR | os.O_CREATE, 
 			0644,
@@ -365,14 +365,31 @@ func generateDependencyByArchiveId(queriedId string) error {
 		if err != nil {
 			return
 		}
-		writer := csv.NewWriter(audioSourcesCsv)
 		defer func() {
-			writer.Flush()
-			audioSourcesCsv.Close()
+			dataFile.Close()
 		}()
 
-		for _, e := range sharedAudioSources {
-			record := []string{ e.AudioSourceID }
+		type SharedAudioSource struct {
+			AudioSourceID string `json:"audio_source_id"`
+			LinkedAudioArchiveIds []string `json:"linked_audio_archive_ids"`
+			LinkedAudioArchiveNames []string `json:"linked_audio_archive_names"`
+		}
+
+		type Data struct {
+			SharedAudioSourceIDs []string `json:"shared_audio_source_ids"`
+			SharedAudioSources []SharedAudioSource `json:"detail"`
+		}
+
+		data := Data{ 
+			make([]string, len(sharedAudioSources)),
+			make([]SharedAudioSource, len(sharedAudioSources)),
+		}
+		for i, e := range sharedAudioSources {
+			data.SharedAudioSourceIDs[i] = e.AudioSourceID
+			s := SharedAudioSource{
+				AudioSourceID: e.AudioSourceID,
+				LinkedAudioArchiveNames: []string{},
+			}
 			for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
 				v, in := audioArchiveNameMap[n]
 				if !in {
@@ -381,12 +398,17 @@ func generateDependencyByArchiveId(queriedId string) error {
 					err = errors.New(errMsg)
 					return
 				}
-				record = append(record, v)
+				s.LinkedAudioArchiveNames = append(s.LinkedAudioArchiveNames, v)
 			}
-			err = writer.Write(record)
-			if err != nil {
-				return
-			}
+			s.LinkedAudioArchiveIds = strings.Split(e.LinkedAudioArchiveIds, ",")
+			data.SharedAudioSources[i] = s
+		}
+		bytes, err := json.MarshalIndent(data, "", "  ")
+		if err != nil {
+			return
+		}
+		if _, err = dataFile.Write(bytes); err != nil {
+			return
 		}
 	}()
 	/** End of shared audio sources */
@@ -409,7 +431,7 @@ func generateDependencyByArchiveId(queriedId string) error {
 		}
 
 		filename := fmt.Sprintf("%s_safe.csv", queriedId)
-		audioSourcesCsv, err := os.OpenFile(
+		dataFile, err := os.OpenFile(
 			filename, 
 			os.O_RDWR | os.O_CREATE, 
 			0644,
@@ -419,22 +441,29 @@ func generateDependencyByArchiveId(queriedId string) error {
 			return
 		}
 
-		writer := csv.NewWriter(audioSourcesCsv)
+		writer := csv.NewWriter(dataFile)
 		defer func() {
 			writer.Flush()
-			audioSourcesCsv.Close()
+			dataFile.Close()
 		}()
 		for _, e := range safeAudioSources {
 			record := []string{ e.AudioSourceID }
-			for _, n := range strings.Split(e.LinkedAudioArchiveNameIds, ",") {
-				v, in := audioArchiveNameMap[n]
-				if !in {
-					errMsg := fmt.Sprintf("Failed to locate audio archive name with ID %s", n)
-					err = errors.New(errMsg)
-					return
-				}
-				record = append(record, v)
+			splits := strings.Split(e.LinkedAudioArchiveNameIds, ",")
+			if len(splits) != 1 {
+				errMsg := fmt.Sprintf("Something wrong with the result of database querying. Multiple linked audio archive name ids detected")
+				err = errors.New(errMsg)
+				return
 			}
+			v, in := audioArchiveNameMap[splits[0]]
+			if !in {
+				errMsg := fmt.Sprintf(
+					"Failed to locate audio archive name with ID %s", 
+					splits[0],
+				)
+				err = errors.New(errMsg)
+				return
+			}
+			record = append(record, v)
 			err = writer.Write(record)
 			if err != nil {
 				return
