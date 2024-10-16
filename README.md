@@ -1,18 +1,22 @@
 ## Table of Content
-- ![Introduction](https://github.com/Dekr0/hd2_audio_db/edit/main/README.md#introduction)
-- ![About CLI](https://github.com/Dekr0/hd2_audio_db/edit/main/README.md#about-the-cli)
+- ![Introduction]()
+- ![About CLI]()
+- ![About Labelling]() 
 - ![About Database]()
     - ![Using & Maintaining a copy of your database]
-- ![About Labelling]() 
 
 ## Introduction
+
 - This repo contains a database that contains information about audio archive, audio sources,
 voice line transcription and other game asset information for Helldiver 2. This is for users
-that both making audio mod and wanting to standardize label for different audio assets.
+that both making audio mod and wanting to standardize label for different audio assets. It's
+under going continuous update.
+- This repo contains a list of human-readable labelling for different audio assets in Helldiver 2.
+It's under going continuous update.
 - This repo contains a CLI (Command Line Interface) to resolve common problems users encounter
 when they are patching audio sources. This is for if you're primarily on making audio mod.
 
-## About the CLI
+## About CLI
 
 ### Install
 
@@ -128,4 +132,14 @@ in. Example output is given in the following
             ],
 ```
 
-    
+## About Labelling
+
+- If you want to know what audio sources that are completely independent on their own (aka.
+safe to patch), go to ![here]() to look at them.
+
+## About Database
+
+- If you want to directly interact the database with SQL, or other external programming language.
+The data are stored in the SQLite database. If you want to perform complex querying in the database,
+you can download ![sqlite3]() CLI tool or this sqlite3 ![SQLite3 GUI tool]() to do so.
+- The schema definition is located in ![here]().
