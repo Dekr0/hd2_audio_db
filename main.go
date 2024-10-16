@@ -569,8 +569,6 @@ func main() {
 	genDepAll := flag.Bool("gen_dep_all", false, "")
 	genDepByArchiveID := flag.String("gen_dep_archive_id", "", "")
 	overWriteCheckFile := flag.String("overwrite_check", "", "")
-	audio_archive_name := flag.String("audio_archive_name", "", "")
-	audio_archive_id := flag.String("audio_archive_id", "", "")
 
 	flag.Parse()
 
@@ -609,7 +607,7 @@ func main() {
 		cleanup(db, logger, start, rcode)
 	}
 
-	if len(*overWriteCheckFile) >= 0 {
+	if len(*overWriteCheckFile) > 0 {
 		err := overwriteCheck(*overWriteCheckFile, db, logger)
 		if err != nil {
 			logger.Error("Error occur when performing overwrite check")
@@ -622,21 +620,13 @@ func main() {
 		cleanup(db, logger, start, rcode)
 	}
 
-	if len(*genDepByArchiveID) >= 0 {
+	if len(*genDepByArchiveID) > 0 {
 		err := generateDependencyByArchiveId(db, *genDepByArchiveID)
 		if err != nil {
 			logger.Error("Error occur when generate dependency for the provided archive ID", 
 				"error", err)
 			rcode = 1
 		}
-		cleanup(db, logger, start, rcode)
-	}
-
-	if len(*audio_archive_id) >= 0 {
-		cleanup(db, logger, start, rcode)
-	}
-
-	if len(*audio_archive_name) >= 0 {
 		cleanup(db, logger, start, rcode)
 	}
 }
