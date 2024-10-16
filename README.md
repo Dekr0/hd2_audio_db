@@ -4,7 +4,7 @@
 - ![About Labelling](#about-labelling) 
 - ![About Database](#about-database)
 
-## Introduction
+## Introduction <a name="introduction"></a>
 
 - This repo contains a database that contains information about audio archive, audio sources,
 voice line transcription and other game asset information for Helldiver 2. This is for users
@@ -15,7 +15,7 @@ It's under going continuous update.
 - This repo contains a CLI (Command Line Interface) to resolve common problems users encounter
 when they are patching audio sources. This is for if you're primarily on making audio mod.
 
-## About CLI
+## About CLI <a name="about-cli"></a>
 
 ### Install
 
@@ -131,12 +131,12 @@ in. Example output is given in the following
             ],
 ```
 
-## About Labelling
+## About Labelling <a name="about-labelling"></a>
 
 - If you want to know what audio sources that are completely independent on their own (aka.
 safe to patch), go to ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label) to look at them.
 
-## About Database
+## About Database <a name="about-database"></a>
 
 - If you want to directly interact the database with SQL, or other external programming language.
 The data are stored in the SQLite database. If you want to perform complex querying in the database,
