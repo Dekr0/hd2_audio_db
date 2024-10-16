@@ -1,8 +1,8 @@
 ## Table of Content
-- ![Introduction](#introduction)
-- ![About CLI](#about-cli)
-- ![About Labelling](#about-labelling) 
-- ![About Database](#about-database)
+- ![Introduction](https://github.com/Dekr0/hd2_audio_db?tab=readme-ov-file#introduction-)
+- ![About CLI](https://github.com/Dekr0/hd2_audio_db?tab=readme-ov-file#about-cli-)
+- ![About Labelling](https://github.com/Dekr0/hd2_audio_db?tab=readme-ov-file#about-labelling-) 
+- ![About Database](https://github.com/Dekr0/hd2_audio_db?tab=readme-ov-file#about-database-)
 
 ## Introduction <a name="introduction"></a>
 
