@@ -1,9 +1,8 @@
 ## Table of Content
-- ![Introduction]()
-- ![About CLI]()
-- ![About Labelling]() 
-- ![About Database]()
-    - ![Using & Maintaining a copy of your database]
+- ![Introduction](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
+- ![About CLI](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
+- ![About Labelling](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation) 
+- ![About Database](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
 
 ## Introduction
 
@@ -141,5 +140,5 @@ safe to patch), go to ![here]() to look at them.
 
 - If you want to directly interact the database with SQL, or other external programming language.
 The data are stored in the SQLite database. If you want to perform complex querying in the database,
-you can download ![sqlite3]() CLI tool or this sqlite3 ![SQLite3 GUI tool]() to do so.
-- The schema definition is located in ![here]().
+you can download ![sqlite3](https://www.sqlite.org/download.html) CLI tool or this sqlite3 ![SQLite3 GUI tool](https://sqlitebrowser.org/) to do so.
+- The schema definition is located in ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/sql/schema).
