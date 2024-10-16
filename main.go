@@ -619,7 +619,7 @@ func overwriteCheck(filename string, logger *slog.Logger) error {
 func cleanup(logger *slog.Logger, start time.Time, rcode int) {
 	diff := time.Now().Sub(start)
 	logger.Info("CLI performance status", 
-		"trivial run time stats", diff.Milliseconds())
+		"trivial run time stats in milliseconds", diff.Milliseconds())
 
 	os.Exit(rcode)
 }
