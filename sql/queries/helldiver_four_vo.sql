@@ -11,3 +11,9 @@ INSERT INTO helldiver_four_vo_fts (
 ) VALUES (
     ?, ?, ?
 );
+
+-- name: DeleteAllHelldiverFourTranscription :exec
+DELETE FROM helldiver_four_voice_line;
+
+-- name: DeleteAllHelldiverFourVOFTSEntry :exec
+DELETE FROM helldiver_four_vo_fts;

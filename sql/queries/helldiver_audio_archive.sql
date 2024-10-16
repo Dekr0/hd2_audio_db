@@ -12,6 +12,15 @@ INSERT INTO helldiver_audio_archive_name (
     ?, ?
 );
 
+-- name: DeleteAllHelldiverAudioArchive :exec
+DELETE FROM helldiver_audio_archive;
+
+-- name: DeleteAllHelldiverArchiveName :exec
+DELETE FROM helldiver_audio_archive_name;
+
+-- name: DeleteAllHelldiverAudioSource :exec
+DELETE FROM helldiver_audio_source;
+
 -- name: HasAudioArchiveID :one
 SELECT DISTINCT COUNT(audio_archive_id) FROM helldiver_audio_archive 
 WHERE audio_archive_id = ?;
