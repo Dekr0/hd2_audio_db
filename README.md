@@ -1,6 +1,6 @@
 ## Table of Content
-- ![Introduction]()
-- ![About CLI]()
+- ![Introduction](https://github.com/Dekr0/hd2_audio_db/edit/main/README.md#introduction)
+- ![About CLI](https://github.com/Dekr0/hd2_audio_db/edit/main/README.md#about-the-cli)
 - ![About Database]()
     - ![Using & Maintaining a copy of your database]
 - ![About Labelling]() 
@@ -20,9 +20,9 @@ when they are patching audio sources. This is for if you're primarily on making 
 - Make sure that `hd_audio_db.db` is in the same folder the executable is in. Otherwise, the
 executale won't know where to find data about all the audio assets
 
-## Usage
+### Usage
 
-### Generate a listing of shared and "safe" audio source for an audio archive 
+#### Generate a listing of shared and "safe" audio source for an audio archive 
 
 - If you want to look for what audio sources in an archive are shared with different other
 archives, and what audio sources in an archive are completely independent (aka. safe to patch)
@@ -46,7 +46,7 @@ Eagle Strafing Run only has very number of audio source if you unpack it. It's a
 20 audio sources in the Gatling Barrage audio archive for its projectile impact SFX but those audio
 sources id don't show up when you unpack Eagle Strafing Run's audio archive. 
 
-### Audio source overwrite check
+#### Audio source overwrite check
 
 - If you want to look for whether the audio sources you want to patch are shared with other archives,
 run the folliwng in the command line at the folder where your exectuable is in, replace the
