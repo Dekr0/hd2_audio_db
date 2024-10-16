@@ -1,8 +1,8 @@
 ## Table of Content
-- ![Introduction](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
-- ![About CLI](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
-- ![About Labelling](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation) 
-- ![About Database](https://github.com/mattn/go-sqlite3?tab=readme-ov-file#installation)
+- ![Introduction](https://github.com/Dekr0/hd2_audio_db#introduction)
+- ![About CLI](https://github.com/Dekr0/hd2_audio_db#about-cli)
+- ![About Labelling](https://github.com/Dekr0/hd2_audio_db#about-labelling) 
+- ![About Database](https://github.com/Dekr0/hd2_audio_db#about-database)
 
 ## Introduction
 
@@ -134,7 +134,7 @@ in. Example output is given in the following
 ## About Labelling
 
 - If you want to know what audio sources that are completely independent on their own (aka.
-safe to patch), go to ![here]() to look at them.
+safe to patch), go to ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label) to look at them.
 
 ## About Database
 
