@@ -1,3 +1,6 @@
 **/internal
 **/hd_audio_db.db
 **/*.env
+**/hda.exe
+**/hda
+**/build
