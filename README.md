@@ -28,7 +28,7 @@ replace `target_archive_id` with actual archie id.
 ```
 hda.exe --gen_dep_archive_id=[target_archive_id]
 ```
-- For example, `hda.exe --gen_dep_archive_id=6ad7cc21015a5f85` will generate two csv files,
+- For example, `hda.exe --gen_dep_archive_id=6ad7cc21015a5f85` will generate two files,
 one for shared audio sources, one for "safe" audio sources.
 - REMARK! The asset names in the csv file that contains shared audio sources are not 100%
 correct. They are suggestions. For accurcate location, use the archive id.
