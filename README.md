@@ -13,7 +13,7 @@ when they are patching audio sources. This is for if you're primarily on making 
 
 ### Install
 
-- First, get the executable of this CLI in the ![release page](https://github.com/Dekr0/hd2_audio_db/releases/tag/v.0.0.1-alpha)
+- First, get the executable of this CLI in here (https://github.com/Dekr0/hd2_audio_db/releases/download/v.0.0.1-alpha/release.zip).
 - Make sure that `hd_audio_db.db` is in the same folder the executable is in. Otherwise, the
 executale won't know where to find data about all the audio assets
 
