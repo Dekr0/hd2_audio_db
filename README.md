@@ -142,7 +142,7 @@ do anything dangerous.
 - When writing labels, please following the general format all files use in 
 ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label). For labeling audio 
 sources relative to weapons and stratagems, please following the naming convention 
-commonly used in ![gun sound design](https://youtu.be/_J56n496u6k?si=10nkfjoSItHGmTGE).
+commonly used in about gun soudn design (https://youtu.be/_J56n496u6k?si=10nkfjoSItHGmTGE).
 
 ## About Database
 
