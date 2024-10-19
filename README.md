@@ -129,11 +129,20 @@ in. Example output is given in the following
 
 - If you want to know what audio sources that are completely independent on their own (aka.
 safe to patch), go to ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label) to look at them.
-- If you want to contribute (correction, adding new labels for an existence audio 
-archive, or adding new labels for a new audio archive), please following the 
-general format all files is using in ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label). 
-For weapons and stratagems, please following the naming convention commonly used 
-in ![gun sound design](https://youtu.be/_J56n496u6k?si=FS-Y3edqlMn-_vcm).
+
+### Contributing
+
+- If you want to contribute to audio source labeling in any sort of form (correction, 
+adding new labels for an existed label file, or adding new label file for a new 
+audio archive), please open an issue / pull request with all the labels you have 
+written down (either in plain text or in a file) as well as your prefer online name 
+for crediting. If you want to contribute to audio source labeling for long terms, 
+I will grant you access to this repository but please be responsible and do not 
+do anything dangerous.
+- When writing labels, please following the general format all files use in 
+![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label). For labeling audio 
+sources relative to weapons and stratagems, please following the naming convention 
+commonly used in ![gun sound design](https://youtu.be/_J56n496u6k?si=FS-Y3edqlMn-_vcm).
 
 ## About Database
 
