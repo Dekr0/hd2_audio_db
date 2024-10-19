@@ -15,7 +15,7 @@ when they are patching audio sources. This is for if you're primarily on making 
 
 - First, get the executable of this CLI in here (https://github.com/Dekr0/hd2_audio_db/releases/download/v.0.0.1-alpha/release.zip).
 - Make sure that `hd_audio_db.db` is in the same folder the executable is in. Otherwise, the
-executale won't know where to find data about all the audio assets
+executable won't know where to find data about all the audio assets
 
 ### Usage
 
@@ -23,15 +23,15 @@ executale won't know where to find data about all the audio assets
 
 - If you want to look for what audio sources in an archive are shared with different other
 archives, and what audio sources in an archive are completely independent (aka. safe to patch)
-on their own, run the following in the command line at the folder where your exectuable is in,
-replace `target_archive_id` with actual archie id.
+on their own, run the following in the command line at the folder where your executable is in,
+replace `target_archive_id` with actual archive id.
 ```
 hda.exe --gen_dep_archive_id=[target_archive_id]
 ```
 - For example, `hda.exe --gen_dep_archive_id=6ad7cc21015a5f85` will generate two files,
 one for shared audio sources, one for "safe" audio sources.
 - REMARK! The asset names in the csv file that contains shared audio sources are not 100%
-correct. They are suggestions. For accurcate location, use the archive id.
+correct. They are suggestions. For accurate location, use the archive id.
 - There are asset names such as Purifier and Scorcher whose archive are exactly the same, i.e.,
 both asset name Purifier and Scorcher points to audio archive `c51f160470b34ae3`. Thus, you
 need to use the audio archive ID and audio source ID to pin point which asset name is actually
@@ -46,7 +46,7 @@ sources id don't show up when you unpack Eagle Strafing Run's audio archive.
 #### Audio source overwrite check
 
 - If you want to look for whether the audio sources you want to patch are shared with other archives,
-run the folliwng in the command line at the folder where your exectuable is in, replace the
+run the following in the command line at the folder where your executable is in, replace the
 `input_file_path` with actual file path of the file you want to in your computer.
 ```
 hda.exe --overwrite_check=[input_file_path]
@@ -125,10 +125,15 @@ in. Example output is given in the following
             ],
 ```
 
-## About Labelling
+## About Labeling
 
 - If you want to know what audio sources that are completely independent on their own (aka.
 safe to patch), go to ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label) to look at them.
+- If you want to contribute (correction, adding new labels for an existence audio 
+archive, or adding new labels for a new audio archive), please following the 
+general format all files is using in ![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label). 
+For weapons and stratagems, please following the naming convention commonly used 
+in ![gun sound design](https://youtu.be/_J56n496u6k?si=FS-Y3edqlMn-_vcm).
 
 ## About Database
 
