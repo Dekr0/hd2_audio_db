@@ -1,0 +1,54 @@
+{
+    "hellpod_impact": {
+        "start": 888075430,
+        "end": 621524394
+    }
+
+    "unknown_explosion": [
+        {
+            "start": 386835453, 
+            "end": 378326256
+        }
+    ],
+
+    "unknown_explosion_far_01": "621197338",
+    "unknown_explosion_far_02": "705135650",
+    "unknown_explosion_far_03": "441552601",
+    "unknown_explosion_far_04": "293546541",
+    "unknown_explosion_far_05": "37351381",
+    "unknown_explosion_far_06": "815804225",
+
+    "unknown_fire_tail_01": "249277732",
+    "unknown_fire_tail_02": "267805994",
+    "unknown_fire_tail_03": "973670276",
+    "unknown_fire_tail_04": "671216802",
+    "unknown_fire_tail_05": "521122439",
+    "unknown_fire_tail_06": "951308640",
+    "unknown_fire_tail_07": "712374013",
+
+    "gatling_fire_bass": "258943485",
+    "gatling_fire": "756088497",
+    "gatling_fire_tail": "337199742",
+    "gatling_fire_very_bass": "416128690",
+    "gatling_fire_very_bass_loop": "458890332",
+    "gatling_fire_loop": "1025998952",
+
+    "rocket_back_blast_01": "765814508",
+    "rocket_back_blast_02": "284449900",
+    "rocket_back_blast_03": "56169741",
+    "rocket_back_blast_04": "898029115",
+
+    "unknown_fire_tail_01": "923016069",
+    "unknown_fire_tail_02": "782344153",
+    "unknown_fire_tail_03": "221125431",
+    "unknown_fire_tail_04": "801309086",
+    "unknown_fire_tail_05": "37971256",
+    "unknown_fire_tail_06": "941413177",
+
+    "unknown_fire_mech_01": "41916173",
+    "unknown_fire_mech_02": "48697400",
+    "unknown_fire_mech_03": "93778274",
+
+    "unknown_echo_far_01": "947002623",
+    "unknown_echo_far_02": "718844176",
+}
