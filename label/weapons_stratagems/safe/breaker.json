@@ -1,0 +1,38 @@
+{
+    "tail_01": "248838882",
+    "tail_02": "890867951",
+    "tail_03": "922246142",
+    "tail_04": "1036081432",
+    "tail_05": "85772572",
+
+    "reload_mag_insert_01": "122054063",
+    "reload_mag_insert_02": "192707219",
+    "reload_mag_insert_03": "622265274",
+    "reload_mag_insert_04": "366744191",
+    "reload_mag_insert_05": "659447170",
+
+    "transient_bass_01": "879316388",
+    "transient_bass_02": "469035912",
+    "transient_bass_03": "401072567",
+    "transient_bass_04": "1015478868",
+    "transient_bass_05": "168649095",
+
+    "transient_01": "209022714",
+    "transient_02": "1066328465",
+    "transient_03": "380591507",
+    "transient_04": "904966005",
+    "transient_05": "1025006452",
+
+    "reload_foley_01": "1004332944",
+    "reload_foley_02": "819486808",
+    "reload_foley_03": "935376160",
+    "reload_foley_04": "825849880",
+    "reload_foley_05": "478109705",
+    "reload_foley_06": "179370242",
+    "reload_foley_07": "735744642",
+    "reload_foley_08": "869585654",
+    "reload_foley_09": "934476146",
+    "reload_foley_10": "745742293",
+    "reload_foley_11": "650625213",
+    "reload_foley_12": "1016175705"
+}
