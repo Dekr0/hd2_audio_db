@@ -1,0 +1,47 @@
+{
+    "shell_eject_01": "407310262",
+    "shell_eject_02": "276231232",
+    "shell_eject_03": "760146779",
+    "shell_eject_04": "989834962",
+    "shell_eject_05": "596132438",
+
+    "transient_tail_01": "458926136",
+    "transient_tail_02": "563092254",
+    "transient_tail_03": "1043464505",
+    "transient_tail_04": "207681903",
+    "transient_tail_05": "837221041",
+
+    "bass_mech_01": "171011462",
+    "bass_mech_02": "678196601",
+    "bass_mech_03": "305807060",
+    "bass_mech_04": "553167497",
+    "bass_mech_05": "1014728585",
+
+    "exp_01": "1038831131",
+    "exp_02": "1012273532",
+    "exp_03": "442730921",
+    "exp_04": "400408848",
+    "exp_05": "900395835",
+
+    "unknown_mech_01": "634671136",
+    "unknown_mech_02": "754205273",
+    "unknown_mech_03": "730564842",
+    "unknown_mech_04": "500048727",
+    "unknown_mech_05": "345530501",
+
+    "mag_attach_01": "751960990",
+    "mag_attach_02": "555028868",
+    "mag_attach_03": "225194859",
+
+    "mag_release_01": "1037011062",
+    "mag_release_02": "89634013",
+    "mag_release_03": "373041401",
+
+    "bolt_forward_01": "28059866",
+    "bolt_forward_02": "720134671",
+    "bolt_forward_03": "149615026",
+
+    "bolt_backward_01": "920827404",
+    "bolt_backward_02": "694452004",
+    "bolt_backward_03": "129990826"
+}
