@@ -57,7 +57,7 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 	type GameArchive struct {
 		ID string
 		GameArchiveID string
-		Tags map[string]struct{}
+		UniqueTags map[string]struct{}
 		UniqueCategories map[string]struct{}
 	}
 
@@ -126,6 +126,9 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 					if _, in = gameArchive.UniqueCategories[category]; !in {
 						gameArchive.UniqueCategories[category] = struct{}{}
 					}
+					if _, in = gameArchive.UniqueTags[tag]; !in {
+						gameArchive.UniqueTags[tag] = struct{}{}
+					}
 					continue
 				}
 
@@ -146,12 +149,12 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 				gameArchive := GameArchive{
 					ID: gameArchiveDBIdS,
 					GameArchiveID: gameArchiveID,
-					Tags: make(map[string]struct{}),
+					UniqueTags: make(map[string]struct{}),
 					UniqueCategories: make(map[string]struct{}),
 				}
 
 				gameArchive.UniqueCategories[category] = struct{}{}
-				gameArchive.Tags[tag] = struct{}{}
+				gameArchive.UniqueTags[tag] = struct{}{}
 
 				uniqueGameArchiveIds[gameArchiveID] = gameArchive
 			}
@@ -181,7 +184,7 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 			categories = append(categories, category)
 		}
 		tags := []string{}
-		for tag := range gameArchive.Tags {
+		for tag := range gameArchive.UniqueTags {
 			tags = append(tags, tag)
 		}
 		if err = queriesWithTx.CreateHelldiverGameArchive(
