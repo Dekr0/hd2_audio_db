@@ -57,10 +57,11 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 	type GameArchive struct {
 		ID string
 		GameArchiveID string
+		Tags map[string]struct{}
 		UniqueCategories map[string]struct{}
 	}
 
-	uniqueGameArchive := make(map[string]GameArchive)
+	uniqueGameArchiveIds := make(map[string]GameArchive)
 
 	for _, csvFile := range csvFiles {
 		filename := csvFile.Name()
@@ -115,9 +116,13 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 			}
 			perFileLineCount += 1
 
-			gameArchiveIDs := record[1:]
+			tag, gameArchiveIDs := record[0], record[1:]
 			for _, gameArchiveID := range gameArchiveIDs {
-				if gameArchive, in := uniqueGameArchive[gameArchiveID]; in {
+				if gameArchiveID == "" {
+					continue
+				}
+
+				if gameArchive, in := uniqueGameArchiveIds[gameArchiveID]; in {
 					if _, in = gameArchive.UniqueCategories[category]; !in {
 						gameArchive.UniqueCategories[category] = struct{}{}
 					}
@@ -141,12 +146,14 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 				gameArchive := GameArchive{
 					ID: gameArchiveDBIdS,
 					GameArchiveID: gameArchiveID,
+					Tags: make(map[string]struct{}),
 					UniqueCategories: make(map[string]struct{}),
 				}
 
 				gameArchive.UniqueCategories[category] = struct{}{}
+				gameArchive.Tags[tag] = struct{}{}
 
-				uniqueGameArchive[gameArchiveID] = gameArchive
+				uniqueGameArchiveIds[gameArchiveID] = gameArchive
 			}
 		}
 		csvFileHandle.Close()
@@ -168,17 +175,22 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 
 	totalRecord := 0
 
-	for _, gameArchive := range uniqueGameArchive {
-		categories := make([]string, len(gameArchive.UniqueCategories))
+	for _, gameArchive := range uniqueGameArchiveIds {
+		categories := []string{} 
 		for category := range gameArchive.UniqueCategories {
 			categories = append(categories, category)
+		}
+		tags := []string{}
+		for tag := range gameArchive.Tags {
+			tags = append(tags, tag)
 		}
 		if err = queriesWithTx.CreateHelldiverGameArchive(
 			ctx,
 			database.CreateHelldiverGameArchiveParams{
 				ID: gameArchive.ID,
 				GameArchiveID: gameArchive.GameArchiveID,
-				Categories: strings.Join(categories, ","),
+				Tags: strings.Join(tags, ";"),
+				Categories: strings.Join(categories, ";"),
 			},
 		); err != nil {
 			return err
