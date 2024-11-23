@@ -2,6 +2,7 @@ package main
 
 import (
 	"log/slog"
+	"os"
 )
 
 func getLogger() func(handle slog.Handler) *slog.Logger {
@@ -17,3 +18,11 @@ func getLogger() func(handle slog.Handler) *slog.Logger {
 		return logger
 	}
 }
+
+var logger *slog.Logger = getLogger()(slog.NewJSONHandler(
+	os.Stdout,
+	&slog.HandlerOptions{
+		AddSource: true,
+		Level: slog.LevelInfo,
+	},
+))
