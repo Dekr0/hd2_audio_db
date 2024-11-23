@@ -39,7 +39,7 @@ type CAkMediaIndex struct {
 
 type CAkObject interface {
 	GetULID() uint32
-	Marshal() ([]byte, error)
+	Marshal() []byte /** This is unused. Experimental */
 }
 
 /**
