@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"encoding/csv"
 	"errors"
+	"flag"
 	"io"
-	"log/slog"
 	"os"
 	"path"
 	"strings"
@@ -19,7 +19,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
+func updateHelldiverGameArchives(dir string) error {
+	godotenv.Load()
+
 	if logger == nil {
 		return errors.New("Logger cannot be nil")
 	}
@@ -212,17 +214,28 @@ func updateHelldiverAudioArchives(dir string, logger *slog.Logger) error {
 	return nil
 }
 
+func Run() error {
+	xmlArg := flag.String("xmls", "", "A list of xmls describe Wwise Soundbank")
+	updateArchiveArg := flag.Bool("update-audio-archives", false, 
+	"Generate a SQL table of Helldivers 2 game archive")
+
+	flag.Parse()
+
+	if xmlArg != nil && *updateArchiveArg {
+		return errors.New("Game Archive update and XML analysis cannot be " +
+		"run at the same time")
+	}
+	
+	if xmlArg != nil {
+		return WwiserOuputParsing(xmlArg)
+	}
+
+	return updateHelldiverGameArchives("./csv/archives")
+}
+
 func main() {
-	godotenv.Load()
-
-	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
-		Level: slog.LevelDebug,
-	})
-	logger := getLogger()(handler)
-
-	if err := updateHelldiverAudioArchives("./csv/archives", logger); err != nil {
-		logger.Error("Failed to update Helldivers 2 game archives ID", "error", err)
+	if err := Run(); err != nil {
+		logger.Error("Error", "error_detail", err)
 		os.Exit(1)
 	}
 	os.Exit(0)
