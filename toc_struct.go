@@ -1,6 +1,12 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+)
 
 const MAGIC = 4026531857
 
@@ -49,6 +55,76 @@ type ToCHeader struct {
     Unknown3 Value[uint32] `json:"Unknown3"`
     Unknown4 Value[uint32] `json:"Unknown4"`
     EntryIndex Value[uint32] `json:"EntryIndex"`
+}
+
+type WwiseSoundbank struct {
+	Id uint64
+	PathName string
+	ReadableName string
+	Categories map[string]struct{}
+	LinkedGameArchiveIds map[string]struct{}
+	RawData []byte
+}
+
+type WwiseSoundbankDep struct {
+	Id uint64
+	PathName string
+}
+
+func (w *WwiseSoundbank) genWwiserXML() error {
+	w.RawData[0x08] = 0x8D
+	w.RawData[0x09] = 0x00
+	w.RawData[0x0A] = 0x00
+	w.RawData[0x0B] = 0x00
+
+	var filename string
+
+	if w.PathName == "" {
+		filename = fmt.Sprintf("%d", w.Id)
+	} else {
+		filename = w.PathName
+	}
+
+	bankFile, err := os.OpenFile(
+		filename, os.O_WRONLY | os.O_CREATE, 0644,
+	)
+	if err != nil {
+		return errors.Join(
+			errors.New("Failed to create a empty file for Wwise soundbank"),
+			err,
+		)
+	}
+	
+	if _, err := bankFile.Write(w.RawData); 
+	err != nil {
+		bankFile.Close()
+		return errors.Join(
+			errors.New("Failed to write Wwise soundbank raw data"),
+			err,
+		)
+	}
+	
+	if err = bankFile.Close(); err != nil {
+		return errors.Join(
+			errors.New("Failed to close Wwise soundbank file"), 
+			err,
+		)
+	}
+	
+	cmd := exec.Command("python3", "wwiser.pyz", filename)
+	if err = cmd.Run(); err != nil {
+		return errors.Join(
+			errors.New("Failed to generate Wwiser XML output"), 
+			err)
+	}
+	
+	if err = os.Remove(filename); err != nil {
+		logger.Error("Failed to remove temporary Wwise soundbank file",
+			"error", err,
+		)
+	}
+
+	return nil
 }
 
 func (t *ToCFile) toJSON() (string, error) {
