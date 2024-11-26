@@ -38,7 +38,7 @@ type CAkMediaIndex struct {
 }
 
 type CAkObject interface {
-	GetULID() uint32
+	GetObjectULID() uint32
 	Marshal() []byte /** This is unused. Experimental */
 }
 
@@ -113,9 +113,9 @@ func (h *CAkHirearchy) Marshal() []byte {
  * Total Size     
  * */
 type CAkRanSeqCntr struct {
-	DirectParentID uint32 `json:"DirectParentID"`
+	DirectParentObjectULID uint32 `json:"DirectParentObjectULID"`
 	CAkSounds map[uint32]*CAkSound `json:"CAkSounds"`
-	ULID uint32 `json:"ULID"`
+	ObjectULID uint32 `json:"ObjectULID"`
 }
 
 func (r *CAkRanSeqCntr) Marshal() []byte {
@@ -129,20 +129,20 @@ func (r *CAkRanSeqCntr) Marshal() []byte {
 		4)
 
 	buf = binary.LittleEndian.AppendUint32(buf, size)
-	buf = binary.LittleEndian.AppendUint32(buf, r.DirectParentID)
+	buf = binary.LittleEndian.AppendUint32(buf, r.DirectParentObjectULID)
 	buf = binary.LittleEndian.AppendUint16(buf, uint16(len(r.CAkSounds)))
 
 	for _, s := range r.CAkSounds {
 		buf = append(buf, s.Marshal()...)
 	}
 
-	buf = binary.LittleEndian.AppendUint32(buf, r.ULID)
+	buf = binary.LittleEndian.AppendUint32(buf, r.ObjectULID)
 
 	return buf
 }
 
-func (r *CAkRanSeqCntr) GetULID() uint32 {
-	return r.ULID
+func (r *CAkRanSeqCntr) GetObjectULID() uint32 {
+	return r.ObjectULID
 }
 
 
@@ -158,20 +158,20 @@ const CAKSOUND_SIZE = 13
 
 type CAkSound struct {
 	DirectParentID uint32 `json:"DirectParentID"`
-	SourceID uint32 `json:"SourceID"`
-	ULID uint32 `json:"ULID"`
+	SourceShortID uint32 `json:"SourceShortID"`
+	ObjectULID uint32 `json:"ObjectULID"`
 	Foreign bool `json:"CrossShared"`
 }
 
-func (s *CAkSound) GetULID() uint32 {
-	return s.ULID
+func (s *CAkSound) GetObjectULID() uint32 {
+	return s.ObjectULID
 }
 
 func (s *CAkSound) Marshal() []byte {
 	buf := []byte{}
 	buf = binary.LittleEndian.AppendUint32(buf, s.DirectParentID)
-	buf = binary.LittleEndian.AppendUint32(buf, s.SourceID)
-	buf = binary.LittleEndian.AppendUint32(buf, s.ULID)
+	buf = binary.LittleEndian.AppendUint32(buf, s.SourceShortID)
+	buf = binary.LittleEndian.AppendUint32(buf, s.ObjectULID)
 	if s.Foreign {
 		buf = append(buf, 1)
 	} else {

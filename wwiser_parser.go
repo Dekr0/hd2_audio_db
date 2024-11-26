@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -93,7 +95,7 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
 	var err error
 
 	logger.Debug("Getting CAkSound ULID")
-	sound.ULID, err = getCAkObjectULID(decoder)
+	sound.ObjectULID, err = getCAkObjectULID(decoder)
 	if err != nil {
 		return nil, err 
 	}
@@ -121,7 +123,7 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
 				if err != nil {
 					return nil, err
 				}
-				sound.SourceID = uint32(sourceID)
+				sound.SourceShortID = uint32(sourceID)
 				
 				return &sound, nil
 			} else {
@@ -138,7 +140,7 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
 	cntr := CAkRanSeqCntr{ 0, make(map[uint32]*CAkSound), 0 }
 
 	logger.Debug("Getting CAkRanSeqCntr ULID")
-	cntr.ULID, err = getCAkObjectULID(decoder)
+	cntr.ObjectULID, err = getCAkObjectULID(decoder)
 	if err != nil {
 		return nil, err 
 	}
@@ -225,11 +227,11 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 						err)
 				}
 
-				if _, in := hirearchy.Sounds[sound.ULID]; in {
+				if _, in := hirearchy.Sounds[sound.ObjectULID]; in {
 					return nil, errors.New("Duplicated CAkSound ULID")
 				}
-				hirearchy.CAkObjects[sound.ULID] = sound
-				hirearchy.Sounds[sound.ULID] = sound
+				hirearchy.CAkObjects[sound.ObjectULID] = sound
+				hirearchy.Sounds[sound.ObjectULID] = sound
 
 				break
 			}
@@ -244,11 +246,11 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 						err)
 				}
 
-				if _, in := hirearchy.RanSeqCntrs[cntr.ULID]; in {
+				if _, in := hirearchy.RanSeqCntrs[cntr.ObjectULID]; in {
 					return nil, errors.New("Duplicated CAkRanSeqCntr ULID")
 				}
-				hirearchy.CAkObjects[cntr.ULID] = cntr
-				hirearchy.RanSeqCntrs[cntr.ULID] = cntr
+				hirearchy.CAkObjects[cntr.ObjectULID] = cntr
+				hirearchy.RanSeqCntrs[cntr.ObjectULID] = cntr
 
 				break
 			}
@@ -315,10 +317,10 @@ func ParseWwiseSoundBankXML(f io.Reader) error {
 					err)
 				}
 
-				// b, err := json.MarshalIndent(hirearchy, "", "    ")
-				// if err == nil {
-				// 	fmt.Println(string(b))
-				// }
+				b, err := json.MarshalIndent(bank.Hirearchy, "", "    ")
+				if err == nil {
+					fmt.Println(string(b))
+				}
 
 				logger.Info("Parsing Result", 
 					"MediaIndexCount", bank.MediaIndex.Count,
@@ -335,8 +337,8 @@ func ParseWwiseSoundBankXML(f io.Reader) error {
 	return nil
 }
 
-func WwiserOuputParsing(xmlArg *string) error {
-	xmls := strings.Split(*xmlArg, ",")
+func ParseWwiseXML(xmlsArg *string) error {
+	xmls := strings.Split(*xmlsArg, ",")
 
 	for _, x := range xmls {
 		r, err := os.Open(x)

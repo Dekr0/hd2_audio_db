@@ -57,21 +57,57 @@ type ToCHeader struct {
     EntryIndex Value[uint32] `json:"EntryIndex"`
 }
 
+type MediaHeader struct {
+	ObjectId uint64
+	ShortId uint32
+	Offset uint32
+	Size uint32
+}
+
 type WwiseSoundbank struct {
-	Id uint64
-	PathName string
-	ReadableName string
-	Categories map[string]struct{}
-	LinkedGameArchiveIds map[string]struct{}
-	RawData []byte
+	ToCDataSize uint32 `json:"ToCDataSize"`
+	ToCFileId uint64 `json:"ToCFileId"`
+	ToCDataOffset uint64 `json:"ToCDataOffset"`
+	PathName string `json:"PathName"`
+	ReadableName string `json:"ReadableName"`
+	RawData []byte `json:"-"`
+	MediaHeaders []*MediaHeader `json:"-"`
+	Categories map[string]struct{} `json:"-"`
+	LinkedGameArchiveIds map[string]struct{} `json:"-"`
 }
 
-type WwiseSoundbankDep struct {
-	Id uint64
-	PathName string
+func (w *WwiseSoundbank) exportToCHeader() error { var filename string
+	if w.PathName == "" {
+		filename = fmt.Sprintf("%d", w.ToCFileId)
+	} else {
+		filename = w.PathName
+	}
+
+	headerFile, err := os.OpenFile(
+		filename + ".json", os.O_WRONLY | os.O_CREATE, 0644,
+	)
+	defer headerFile.Close()
+
+	if err != nil {
+		return err
+	}
+
+	ToCMetaData, err := json.MarshalIndent(w, "", "    ")
+	if err != nil {
+		return errors.Join(
+			errors.New("Failed to JSON encode ToC header information"),
+			err)
+	}
+
+	if _, err = headerFile.Write(ToCMetaData); err != nil {
+		return errors.Join(errors.New("Failed to write JSON blob into file"), 
+		err)
+	}
+
+	return nil
 }
 
-func (w *WwiseSoundbank) genWwiserXML() error {
+func (w *WwiseSoundbank) exportWwiserXML() error {
 	w.RawData[0x08] = 0x8D
 	w.RawData[0x09] = 0x00
 	w.RawData[0x0A] = 0x00
@@ -80,7 +116,7 @@ func (w *WwiseSoundbank) genWwiserXML() error {
 	var filename string
 
 	if w.PathName == "" {
-		filename = fmt.Sprintf("%d", w.Id)
+		filename = fmt.Sprintf("%d", w.ToCFileId)
 	} else {
 		filename = w.PathName
 	}
@@ -117,14 +153,13 @@ func (w *WwiseSoundbank) genWwiserXML() error {
 			errors.New("Failed to generate Wwiser XML output"), 
 			err)
 	}
-	
-	if err = os.Remove(filename); err != nil {
-		logger.Error("Failed to remove temporary Wwise soundbank file",
-			"error", err,
-		)
-	}
 
 	return nil
+}
+
+type WwiseSoundbankDep struct {
+	Id uint64
+	PathName string
 }
 
 func (t *ToCFile) toJSON() (string, error) {
