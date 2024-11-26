@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"os"
 )
 
-func Run() error {
+func run() error {
 	if len(os.Args) > 3 {
 		logger.Error("Only one option can run at the same time")
 	}
@@ -62,11 +61,11 @@ func Run() error {
 
 	flag.Usage()
 
-	return errors.New("Invalid argument for the provided option")
+	return nil
 }
 
 func main() {
-	if err := Run(); err != nil {
+	if err := run(); err != nil {
 		logger.Error("Error", "error_detail", err)
 		os.Exit(1)
 	}
