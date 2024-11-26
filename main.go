@@ -1,39 +1,64 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"os"
 )
 
 func Run() error {
-	if len(os.Args) > 2 {
+	if len(os.Args) > 3 {
 		logger.Error("Only one option can run at the same time")
 	}
 
-	uflag := flag.Bool("u", false, "")
-	xflag := flag.String("x", "", "")
-	eflag := flag.String("e", "", "")
+	dataPathFlag := flag.String("data", "", 
+	"Absolute path to Helldivers 2 data directory")
+
+	archiveTableFlag := flag.Bool("table-archive", false, 
+	"Completely rewrite basic information of all game archives into the DB" + 
+	" (Destructive)")
+
+	bankTableFlag := flag.Bool("table-bank", false,
+	"Completely rewrite information about Wwise Soundbank and its hierarchy " +
+	" objects used in game into the DB (Destructive)")
+
+	streamTableFlag := flag.Bool("table-stream", false, 
+	"Completely rewrite information about all Wwise streams used in game into" +
+	" the DB (Destructive)")
+
+	extractBankFlag := flag.String("extract-bank", "", 
+	"Extract basic information of Wwise Soundbanks in (a) game archive(s), Wwise " +
+	"Soundbank binary content, and its Wwiser XML output")
+
+	xmlFlag := flag.String("xmls", "", "")
 
 	flag.Parse()
 
-	if *uflag {
-		logger.Debug("Option selected: Update Helldivers 2 Game Archives Table")
-		return updateHelldiverGameArchives("./csv/archives")
+	ctx := context.Background()
+
+	if *archiveTableFlag {
+		return updateHelldiverGameArchives("./csv/archives", ctx)
 	}
 
-	if *eflag != "" {
-		logger.Debug("Option selected: Exporting Wwise XML")
-		genWwiserXML(eflag)
+	if *bankTableFlag {
+		return updateHelldiverSoundbanks(*dataPathFlag, ctx)
+	}
 
+	if *streamTableFlag {
+		return updateHelldiverStreams(*dataPathFlag, ctx)
+	}
+
+	if *extractBankFlag != "" {
+		logger.Debug("Option selected: extract-bank")
+		ExtractBank(extractBankFlag)
 		return nil
 	}
 
-	if *xflag != "" {
+	if *xmlFlag != "" {
 		logger.Debug("Option selected: Wwiser XML parsing")
-		return ParseWwiseXML(xflag)
+		return ParseWwiseXML(xmlFlag)
 	}
-
 
 	flag.Usage()
 
