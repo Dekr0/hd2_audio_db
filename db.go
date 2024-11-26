@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 
 	"dekr0/hd2_audio_db/internal/database"
@@ -18,7 +19,21 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func updateHelldiverGameArchives(dir string) error {
+func genDBID() (*string, error) {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+	
+	idS := id.String()
+	if idS == "" {
+		return nil, errors.New("Empty string when generate UUID4 string")
+	}
+
+	return &idS, nil
+}
+
+func updateHelldiverGameArchives(dir string, ctx context.Context) error {
 	godotenv.Load()
 
 	if logger == nil {
@@ -38,7 +53,6 @@ func updateHelldiverGameArchives(dir string) error {
 	defer db.Close()
 
 	dbQueries := database.New(db)
-	ctx := context.Background()
 
 	tx, err := db.Begin()
 	if err != nil {
@@ -133,22 +147,18 @@ func updateHelldiverGameArchives(dir string) error {
 					continue
 				}
 
-				gameArchiveDBId, err := uuid.NewUUID()
+				dbId, err := genDBID()
 				if err != nil {
-					errMsg := "Failed to generate UUID4 for a new game archive " +
-				             gameArchiveID
-					return errors.Join(err, errors.New(errMsg))
-				}
-
-				gameArchiveDBIdS := gameArchiveDBId.String()
-				if gameArchiveDBIdS == "" {
-					errMsg := "Empty string when generate UUID4 string for a new " + 
-					         "archive " + gameArchiveID
-					return errors.New(errMsg)
+					logger.Error(
+						"Failed to generate UUID4 for a new game archive",
+						"GameArchiveID", gameArchiveID,
+						"error", err,
+					)
+					continue
 				}
 
 				gameArchive := GameArchive{
-					ID: gameArchiveDBIdS,
+					ID: *dbId,
 					GameArchiveID: gameArchiveID,
 					UniqueTags: make(map[string]struct{}),
 					UniqueCategories: make(map[string]struct{}),
@@ -213,6 +223,127 @@ func updateHelldiverGameArchives(dir string) error {
 	return nil
 }
 
-func updateHelldiverSoundbanks() {
+func updateHelldiverSoundbanks(dataPath string, ctx context.Context) error {
+	godotenv.Load()
 
+	if logger == nil {
+		return errors.New("Logger cannot be nil")
+	}
+
+	dbPath := os.Getenv("DB_PATH")
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	dbQueries := database.New(db)
+
+	gameArchives, err := dbQueries.GetAllGameArchives(ctx)
+	if err != nil {
+		return err
+	}
+
+	logger.Info("", "len", len(gameArchives))
+
+	totalBanksVisit := 0
+
+	uniqueBanks := make(map[uint64]*WwiseSoundbank)
+	for _, gameArchive := range gameArchives {
+		tocFilePath := path.Join(dataPath, gameArchive.GameArchiveID)
+
+		gameArchiveID := gameArchive.GameArchiveID
+
+		_, err := os.Stat(tocFilePath); 
+		if err != nil {
+			if os.IsNotExist(err) {
+				logger.Error("Game archive ID " + tocFilePath + " does not exist") 
+				continue
+			} else {
+				logger.Error("OS error", "error", err)
+				continue
+			}
+		}
+
+		tocFile, err := os.Open(tocFilePath)
+		if err != nil {
+			logger.Error("File open error", "error", err)
+			continue
+		}
+		defer tocFile.Close()
+
+		banks, err := ExtractWwiseSoundbank(tocFile, false)
+		if err != nil {
+			logger.Error("Failed to parse ToC File", "error", err)
+		}
+		totalBanksVisit += len(banks)
+
+		for id, bank := range banks {
+			existBank, in := uniqueBanks[id]
+			if !in {
+				uniqueBanks[id] = bank
+			} else {
+				if _, in := existBank. LinkedGameArchiveIds[gameArchiveID]; !in {
+					existBank.LinkedGameArchiveIds[gameArchiveID] = struct{}{}
+				}
+			}
+		}
+	}
+
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	queriesWithTx := dbQueries.WithTx(tx)
+	if err = queriesWithTx.DeleteAllHelldiverSoundbank(ctx); err != nil {
+		return err
+	}
+
+	totalRecord := 0
+	for bid, b := range uniqueBanks {
+		linkedGameArchiveIds := []string{}
+		for gid := range b.LinkedGameArchiveIds {
+			linkedGameArchiveIds = append(linkedGameArchiveIds, gid)
+		}
+		dbId, err := genDBID()
+		if err != nil {
+			logger.Error(
+				"Failed to generate UUID4 for a new game archive",
+				"ToCFileID", bid,
+				"error", err,
+			)
+			continue
+		}
+		if err = queriesWithTx.CreateHelldiverSoundbank(ctx,
+			database.CreateHelldiverSoundbankParams{
+				ID: *dbId,
+				TocFileID: strconv.Itoa(int(b.ToCFileId)),
+				SonndbankPathName: b.PathName,
+				SoundbankReadableName: "",
+				Categories: "",
+				LinkedGameArchiveIds: strings.Join(linkedGameArchiveIds, ";"),
+			},
+		); err != nil {
+			return err
+		}
+		totalRecord++
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+	
+	logger.Info("Finished update Helldiver 2 Wwise Sounbank records",
+		"totalRecord", totalRecord,
+		"totalBanksVisit", totalBanksVisit,
+		"totalUniqueBanks", len(uniqueBanks),
+	)
+
+	return nil
+}
+
+func updateHelldiverStreams(dataPath string, ctx context.Context) error {
+	return nil
 }
