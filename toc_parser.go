@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func parseToCHeader(r *StingRayAssetReader) (*ToCHeader, error) {
+func ParseToCHeader(r *StingRayAssetReader) (*ToCHeader, error) {
     var err error
 
     header := &ToCHeader{}
@@ -80,151 +80,8 @@ func parseToCHeader(r *StingRayAssetReader) (*ToCHeader, error) {
     return header, nil
 }
 
-func extractWwiseSoundbank(tocFile *os.File) (
-	map[uint64]*WwiseSoundbank, error) {
-    reader := &StingRayAssetReader{ File: tocFile }
-
-    var err error = nil
-
-	magic, _,  err := reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-    if magic != MAGIC {
-        return nil, errors.New("ToC file does not start with MAGIC number")
-    }
-	logger.Debug("Readed MAGIC", 
-		"Magic", magic,
-		"Head", reader.Head,
-	)
-
-	numTypes, _, err := reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-	logger.Debug("Readed NumTypes", 
-		"NumTypes", numTypes,
-		"Head", reader.Head,
-	)
-
-	numFiles, _, err := reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-	logger.Debug("Readed NumFiles", 
-		"NumTypes", numFiles,
-		"Head", reader.Head,
-	)
-
-	reader.RelativeSeek(int64(60 + 32 * numTypes))
-
-    ToCStart := reader.Head
-
-	logger.Debug("ToCStart Checkpoint",
-		"Head", ToCStart,
-	)
-
-	banks := make(map[uint64]*WwiseSoundbank)
-	bankDeps := make(map[uint64]*WwiseSoundbankDep)
-
-    for i := 0; i < int(numFiles); i++ {
-        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
-            return nil, err
-        }
-
-		ToCPrev := reader.Head
-        header, err := parseToCHeader(reader)
-        if err != nil {
-            return nil, err
-        }
-
-		logger.Debug("Head change",
-			"Before", ToCPrev,
-			"After", reader.Head,
-			"Diff", reader.Head - ToCPrev,
-		)
-        logger.Debug("Parsed ToC Header File ID", 
-			"FileID", header.FileID.Value,
-			"TypeID", header.TypeID.Value)
-
-		if header.TypeID.Value == TYPE_WWISE_BANK {
-			if _, in := banks[header.FileID.Value]; in {
-				errMsg := fmt.Sprintf("Duplicate Wwise Soundbank file ID: %d", 
-				header.FileID.Value)
-				return nil, errors.New(errMsg)
-			}
-
-			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 16))
-			if err != nil {
-				return nil, err
-			}
-
-			data := make([]byte, header.ToCDataSize.Value - 16)
-			_, err := reader.Read(data)
-			if err != nil {
-				return nil, err
-			}
-
-			banks[header.FileID.Value] = &WwiseSoundbank{
-				Id: header.FileID.Value,
-				RawData: data,
-			}
-		} else if header.TypeID.Value == TYPE_WWISE_DEP {
-			if _, in := bankDeps[header.FileID.Value]; in {
-				errMsg := fmt.Sprintf(
-					"Duplicated Wwise Soundbank dependencies file ID: %d", 
-					header.FileID.Value)
-				return nil, errors.New(errMsg)
-			}
-
-			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 4))
-			if err != nil {
-				return nil, err
-			}
-
-			size, _, err := reader.ReadUint32()
-			if err != nil {
-				return nil, err
-			}
-
-			buf := make([]byte, size)
-			_, err = reader.Read(buf)
-			if err != nil {
-				return nil, err
-			}
-
-			bankDeps[header.FileID.Value] = &WwiseSoundbankDep{
-				header.FileID.Value,
-				strings.Replace(
-					strings.Replace(string(buf), "\u0000", "", -1),
-					"/", "_", -1),
-			}
-		}
-    }
-
-	/** 
-	 * In case of which Wwise Soundbank and Wwise Soundbank Dependencies are 
-	 * put in out of order
-	 * */
-	 for id, bank := range banks {
-		 bankDep, in := bankDeps[id]
-		 if !in {
-			 logger.Warn("A Wwise Soundbank without a Wwise Soundbank " +
-			 "dependencies", "ToCFileID", id)
-			 continue
-		 }
-		 bank.PathName = bankDep.PathName
-	 }
-
-    return nil, nil
-}
-
-
-func ParseToC(tocFile *os.File) (*ToCFile, error) {
+func ParseToCBasic(reader *StingRayAssetReader) (*ToCFile, error) {
     ToC := ToCFile{}
-
-    reader := &StingRayAssetReader{ File: tocFile }
 
     var err error = nil
 
@@ -287,6 +144,196 @@ func ParseToC(tocFile *os.File) (*ToCFile, error) {
 		"Head", reader.Head,
 	)
 
+	return &ToC, nil
+}
+
+func ExtractWwiseSoundbankMediaHeader(data []byte) []*MediaHeader {
+	for i := 0; i < len(data) / 12; i++ {
+		
+	}
+
+	return nil
+}
+
+func ExtractWwiseStream(tocFile *os.File) (map[uint64]struct{}, error) {
+	reader := &StingRayAssetReader{ File: tocFile }
+
+	ToC, err := ParseToCBasic(reader)
+	if err != nil {
+		return nil, errors.Join(
+			errors.New("Failed to parse ToC File's basic information"), err)
+	}
+
+	reader.RelativeSeek(int64(60 + 32 * ToC.NumTypes.Value))
+
+    ToCStart := reader.Head
+
+	logger.Debug("ToCStart Checkpoint",
+		"Head", ToCStart,
+	)
+
+	streams := make(map[uint64]struct{})
+
+	for i := 0; i < int(ToC.NumFiles.Value); i++ {
+        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
+            return nil, err
+        }
+
+		ToCPrev := reader.Head
+		header, err := ParseToCHeader(reader)
+		if err != nil {
+			return nil, errors.Join(
+				errors.New("Failed to parse ToC Header"), err)
+		}
+
+		logger.Debug("Head change",
+			"Before", ToCPrev,
+			"After", reader.Head,
+			"Diff", reader.Head - ToCPrev,
+		)
+        logger.Info("Parsed ToC Header File ID", "FileID", header.FileID)
+
+		if header.TypeID.Value == TYPE_WWISE_STREAM {
+			if _, in := streams[header.FileID.Value]; in {
+				logger.Warn("A Wwise stream with duplicated ToC file ID",
+					"ToCFileID", header.FileID.Value,
+				)
+			}
+			streams[header.FileID.Value] = struct{}{}
+		}
+	}
+
+	return streams, nil
+}
+
+func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
+	map[uint64]*WwiseSoundbank, error) {
+    reader := &StingRayAssetReader{ File: tocFile }
+
+	ToC, err := ParseToCBasic(reader)
+	if err != nil {
+		return nil, errors.Join(
+			errors.New("Failed to parse ToC File's basic information"), err)
+	}
+
+	reader.RelativeSeek(int64(32 * ToC.NumTypes.Value))
+
+    ToCStart := reader.Head
+
+	logger.Debug("ToCStart Checkpoint",
+		"Head", ToCStart,
+	)
+
+	banks := make(map[uint64]*WwiseSoundbank)
+	bankDeps := make(map[uint64]*WwiseSoundbankDep)
+
+    for i := 0; i < int(ToC.NumFiles.Value); i++ {
+        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
+            return nil, err
+        }
+
+		ToCPrev := reader.Head
+        header, err := ParseToCHeader(reader)
+        if err != nil {
+            return nil, err
+        }
+
+		logger.Debug("Head change",
+			"Before", ToCPrev,
+			"After", reader.Head,
+			"Diff", reader.Head - ToCPrev,
+		)
+        logger.Debug("Parsed ToC Header File ID", 
+			"FileID", header.FileID.Value,
+			"TypeID", header.TypeID.Value)
+
+		if header.TypeID.Value == TYPE_WWISE_BANK {
+			if _, in := banks[header.FileID.Value]; in {
+				errMsg := fmt.Sprintf("Duplicate Wwise Soundbank file ID: %d", 
+				header.FileID.Value)
+				return nil, errors.New(errMsg)
+			}
+
+			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 16))
+			if err != nil {
+				return nil, err
+			}
+
+			data := make([]byte, header.ToCDataSize.Value - 16)
+			_, err := reader.Read(data)
+			if err != nil {
+				return nil, err
+			}
+
+			banks[header.FileID.Value] = &WwiseSoundbank{
+				ToCDataSize: header.ToCDataSize.Value - 16,
+				ToCFileId: header.FileID.Value,
+				ToCDataOffset: header.ToCDataOffset.Value,
+			}
+			if rawData {
+				banks[header.FileID.Value].RawData = data
+			}
+		} else if header.TypeID.Value == TYPE_WWISE_DEP {
+			if _, in := bankDeps[header.FileID.Value]; in {
+				errMsg := fmt.Sprintf(
+					"Duplicated Wwise Soundbank dependencies file ID: %d", 
+					header.FileID.Value)
+				return nil, errors.New(errMsg)
+			}
+
+			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 4))
+			if err != nil {
+				return nil, err
+			}
+
+			size, _, err := reader.ReadUint32()
+			if err != nil {
+				return nil, err
+			}
+
+			buf := make([]byte, size)
+			_, err = reader.Read(buf)
+			if err != nil {
+				return nil, err
+			}
+
+			bankDeps[header.FileID.Value] = &WwiseSoundbankDep{
+				header.FileID.Value,
+				strings.Replace(
+					strings.Replace(string(buf), "\u0000", "", -1),
+					"/", "_", -1),
+			}
+		}
+    }
+
+	/** 
+	 * In case of which Wwise Soundbank and Wwise Soundbank Dependencies are 
+	 * put in out of order
+	 * */
+	 logger.Info("", "banks", len(banks), "deps", len(bankDeps))
+	 for id, bank := range banks {
+		 bankDep, in := bankDeps[id]
+		 if !in {
+			 logger.Warn("A Wwise Soundbank without a Wwise Soundbank " +
+			 "dependencies", "ToCFileID", id)
+			 continue
+		 }
+		 bank.PathName = bankDep.PathName
+	 }
+
+    return banks, nil
+}
+
+func ParseToC(tocFile *os.File) (*ToCFile, error) {
+    reader := &StingRayAssetReader{ File: tocFile }
+
+	ToC, err := ParseToCBasic(reader)
+	if err != nil {
+		return nil, errors.Join(
+			errors.New("Failed to parse basic information of ToCFile"),
+			err)
+	}
+
     err = reader.RelativeSeek(int64(32 * ToC.NumTypes.Value))
     ToCStart := reader.Head
 
@@ -300,7 +347,7 @@ func ParseToC(tocFile *os.File) (*ToCFile, error) {
             return nil, err
         }
 		ToCPrev := reader.Head
-        header, err := parseToCHeader(reader)
+        header, err := ParseToCHeader(reader)
         if err != nil {
             return nil, err
         }
@@ -313,11 +360,11 @@ func ParseToC(tocFile *os.File) (*ToCFile, error) {
 
         ToC.ToCEntries[i] = header
     }
-    return &ToC, err 
+    return ToC, err 
 }
 
-func genWwiserXML(gameArchiveIDsArg *string) {
-	gameArchiveIDs := strings.Split(*gameArchiveIDsArg, ",")
+func ExtractBank(extractBankFlag *string) {
+	gameArchiveIDs := strings.Split(*extractBankFlag, ",")
 
 	for _, gameArchiveID := range gameArchiveIDs {
 		_, err := os.Stat(gameArchiveID); 
@@ -338,13 +385,17 @@ func genWwiserXML(gameArchiveIDsArg *string) {
 		}
 		defer tocFile.Close()
 
-		banks, err := extractWwiseSoundbank(tocFile)
+		banks, err := ExtractWwiseSoundbank(tocFile, true)
 		if err != nil {
 			logger.Error("Failed to parse ToC File", "error", err)
 		}
 		
 		for id, bank := range banks {
-			if err = bank.genWwiserXML(); err != nil {
+			if err = bank.exportToCHeader(); err != nil {
+				logger.Error("Failed to export ToC header", "ToCFileID", id, 
+				"error", err)
+			}
+			if err = bank.exportWwiserXML(); err != nil {
 				logger.Error("Failed to generate Wwiser XML", "TocFileID", id,
 				"error", err)
 			}
