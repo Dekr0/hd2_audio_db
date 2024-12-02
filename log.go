@@ -19,7 +19,7 @@ func getLogger() func(handle slog.Handler) *slog.Logger {
 	}
 }
 
-var logger *slog.Logger = getLogger()(slog.NewJSONHandler(
+var DefaultLogger *slog.Logger = getLogger()(slog.NewJSONHandler(
 	os.Stdout,
 	&slog.HandlerOptions{
 		AddSource: true,

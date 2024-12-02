@@ -215,7 +215,7 @@ func TestParsingBasicHeader(t *testing.T) {
         if err != nil {
 			t.Fatal(err) 
         }
-		ToCFile, err := ParseToC(f, logger)
+		ToCFile, err := parseToC(*f)
         if err != nil {
             t.Fatal(err)
         }
@@ -252,7 +252,7 @@ func TestParsingToCHeader(t *testing.T) {
         if err != nil {
 			t.Fatal(err) 
         }
-		ToCFile, err := ParseToC(f, logger)
+		ToCFile, err := parseToC(*f)
         if err != nil {
             t.Fatal(err)
         }

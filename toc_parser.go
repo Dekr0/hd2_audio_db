@@ -4,150 +4,53 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"strings"
 )
 
-func ParseToCHeader(r *StingRayAssetReader) (*ToCHeader, error) {
-    var err error
+// Main entry point for extracting Wwise Soundbank binary content from a given
+// list of game archives. The binary content will be written in disk in the form
+// of a file.
+// It will generate a json file that contain the bytes offset of a given Wwise
+// Soundbank in a game archive. This is useful when using hex editor.
+// It will generate a XML file using Wwiser. This XML file contain semi-readable
+// information a given Wwise Soundbank
+//
+// [parameter]
+// extractBankFlag - a pointer to string that contain a list of game archive IDs
+// separated by ","
+func extractBank(extractBankFlag string) {
+	gameArchiveIDs := strings.Split(extractBankFlag, ",")
 
-    header := &ToCHeader{}
+	for _, gameArchiveID := range gameArchiveIDs {
+        tocFile, err := openToCFile(gameArchiveID)
+        if err != nil {
+            DefaultLogger.Error("Failed to open ToC File", "error", err)
+            continue
+        }
+        defer tocFile.Close()
 
-	header.FileID.Value, header.FileID.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.TypeID.Value, header.TypeID.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.ToCDataOffset.Value, header.ToCDataOffset.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.StreamFileOffset.Value, header.StreamFileOffset.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.GPUResourceOffset.Value, header.GPUResourceOffset.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.Unknown1.Value, header.Unknown1.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.Unknown2.Value, header.Unknown2.Address, err = r.ReadUint64()
-    if err != nil {
-        return nil, err
-    }
-
-	header.ToCDataSize.Value, header.ToCDataSize.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-	header.StreamSize.Value, header.StreamSize.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-	header.GPUResourceSize.Value, header.GPUResourceSize.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-	header.Unknown3.Value, header.Unknown3.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-	header.Unknown4.Value, header.Unknown4.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-	header.EntryIndex.Value, header.EntryIndex.Address, err = r.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-    return header, nil
-}
-
-func ParseToCBasic(reader *StingRayAssetReader) (*ToCFile, error) {
-    ToC := ToCFile{}
-
-    var err error = nil
-
-	ToC.Magic.Value, ToC.Magic.Address, err = reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-
-    if ToC.Magic.Value != MAGIC {
-        return nil, errors.New("ToC file does not start with MAGIC number")
-    }
-	logger.Debug("Readed MAGIC", 
-		"Magic", ToC.Magic.Value,
-		"Head", reader.Head,
-	)
-
-	ToC.NumTypes.Value, ToC.NumTypes.Address, err = reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-	logger.Debug("Readed NumTypes", 
-		"NumTypes", ToC.NumTypes.Value,
-		"Head", reader.Head,
-	)
-
-	ToC.NumFiles.Value, ToC.NumFiles.Address, err = reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-	logger.Debug("Readed NumFiles", 
-		"NumTypes", ToC.NumFiles,
-		"Head", reader.Head,
-	)
-
-	ToC.Unknown.Value, ToC.Unknown.Address, err = reader.ReadUint32()
-    if err != nil {
-        return nil, err
-    }
-	logger.Debug("Readed Unknown",
-		"Unknown", ToC.Unknown,
-		"Head", reader.Head,
-	)
-
-	unk4Data := make([]byte, 56)
-	head, err := reader.Read(unk4Data)
-    if err != nil {
-        return nil, err
-    }
-	for i, d := range unk4Data {
-		ToC.Unk4Data[i].Address = int64(i) + head
-		ToC.Unk4Data[i].Value = d
+		banks, err := extractWwiseSoundbanks(*tocFile, true)
+		if err != nil {
+			DefaultLogger.Error("Failed to parse ToC File", "error", err)
+            continue
+		}
+		
+		for id, bank := range banks {
+			if err = bank.exportToCHeader(); err != nil {
+				DefaultLogger.Error("Failed to export ToC header", "ToCFileID", id, 
+				"error", err)
+			}
+			if err = bank.exportWwiserXML(false); err != nil {
+				DefaultLogger.Error("Failed to generate Wwiser XML", "ToCFileID", id,
+				"error", err)
+			}
+		}
 	}
-
-	logger.Debug("Readed Unk4Data", 
-		"Unk4Data", ToC.Unk4Data,
-		"Head", reader.Head,
-	)
-
-	logger.Debug("Basic Header Checkpoint",
-		"Head", reader.Head,
-	)
-
-	return &ToC, nil
 }
 
-func ExtractWwiseSoundbankMediaHeader(data []byte) []*MediaHeader {
+// Under construction
+func extractWwiseSoundbankMediaHeader(data []byte) []*MediaHeader {
 	for i := 0; i < len(data) / 12; i++ {
 		
 	}
@@ -155,95 +58,110 @@ func ExtractWwiseSoundbankMediaHeader(data []byte) []*MediaHeader {
 	return nil
 }
 
-func ExtractWwiseStream(tocFile *os.File) (map[uint64]struct{}, error) {
-	reader := &StingRayAssetReader{ File: tocFile }
+// Under construction
+func extractWwiseStream(tocFile os.File) (map[uint64]Empty, error) {
+	reader := &StingRayAssetReader{ file: tocFile }
 
-	ToC, err := ParseToCBasic(reader)
+	ToC, err := parseToCBasic(reader)
 	if err != nil {
 		return nil, errors.Join(
 			errors.New("Failed to parse ToC File's basic information"), err)
 	}
 
-	reader.RelativeSeek(int64(60 + 32 * ToC.NumTypes.Value))
+	reader.relativeSeek(int64(60 + 32 * ToC.NumTypes.Value))
 
-    ToCStart := reader.Head
+    ToCStart := reader.head
 
-	logger.Debug("ToCStart Checkpoint",
+	DefaultLogger.Debug("ToCStart Checkpoint",
 		"Head", ToCStart,
 	)
 
-	streams := make(map[uint64]struct{})
+	streams := make(map[uint64]Empty)
 
 	for i := 0; i < int(ToC.NumFiles.Value); i++ {
-        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
+        if err = reader.absoluteSeek(ToCStart + int64(i) * 80); err != nil {
             return nil, err
         }
 
-		ToCPrev := reader.Head
-		header, err := ParseToCHeader(reader)
+		ToCPrev := reader.head
+		header, err := parseToCHeader(reader)
 		if err != nil {
 			return nil, errors.Join(
 				errors.New("Failed to parse ToC Header"), err)
 		}
 
-		logger.Debug("Head change",
+		DefaultLogger.Debug("Head change",
 			"Before", ToCPrev,
-			"After", reader.Head,
-			"Diff", reader.Head - ToCPrev,
+			"After", reader.head,
+			"Diff", reader.head - ToCPrev,
 		)
-        logger.Info("Parsed ToC Header File ID", "FileID", header.FileID)
+        DefaultLogger.Info("Parsed ToC Header File ID", "fileID", header.FileID)
 
 		if header.TypeID.Value == TYPE_WWISE_STREAM {
 			if _, in := streams[header.FileID.Value]; in {
-				logger.Warn("A Wwise stream with duplicated ToC file ID",
+				DefaultLogger.Warn("A Wwise stream with duplicated ToC file ID",
 					"ToCFileID", header.FileID.Value,
 				)
 			}
-			streams[header.FileID.Value] = struct{}{}
+			streams[header.FileID.Value] = Empty{}
 		}
 	}
 
 	return streams, nil
 }
 
-func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
-	map[uint64]*WwiseSoundbank, error) {
-    reader := &StingRayAssetReader{ File: tocFile }
+// Extract all Wwise Soundbank from a given ToC file.
+//
+// [parameter]
+// tocFile - trivial
+// rawData - This specifies whether include the all binary content of a given 
+// Wwise Soundbank. This is useful for exporting the soundbank into a local 
+// file
+//
+// [return]
+// map[uint64]*ToCWwiseSoundbank - All Wwise Soundbanks in a given game archive.
+// Nil when an error occur.
+// error - trivial
+func extractWwiseSoundbanks(tocFile os.File, rawData bool) (
+	map[uint64]*ToCWwiseSoundbank, error) {
+    reader := &StingRayAssetReader{ file: tocFile }
 
-	ToC, err := ParseToCBasic(reader)
+	ToC, err := parseToCBasic(reader)
 	if err != nil {
 		return nil, errors.Join(
 			errors.New("Failed to parse ToC File's basic information"), err)
 	}
 
-	reader.RelativeSeek(int64(32 * ToC.NumTypes.Value))
+	if err = reader.relativeSeek(int64(32 * ToC.NumTypes.Value)); err != nil {
+        return nil, err
+    }
 
-    ToCStart := reader.Head
+    ToCStart := reader.head
 
-	logger.Debug("ToCStart Checkpoint",
+	DefaultLogger.Debug("ToC starting checkpoint",
 		"Head", ToCStart,
 	)
 
-	banks := make(map[uint64]*WwiseSoundbank)
+	banks := make(map[uint64]*ToCWwiseSoundbank)
 	bankDeps := make(map[uint64]*WwiseSoundbankDep)
 
     for i := 0; i < int(ToC.NumFiles.Value); i++ {
-        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
+        if err = reader.absoluteSeek(ToCStart + int64(i) * 80); err != nil {
             return nil, err
         }
 
-		ToCPrev := reader.Head
-        header, err := ParseToCHeader(reader)
+		ToCPrev := reader.head
+        header, err := parseToCHeader(reader)
         if err != nil {
             return nil, err
         }
 
-		logger.Debug("Head change",
+		DefaultLogger.Debug("Head change",
 			"Before", ToCPrev,
-			"After", reader.Head,
-			"Diff", reader.Head - ToCPrev,
+			"After", reader.head,
+			"Diff", reader.head - ToCPrev,
 		)
-        logger.Debug("Parsed ToC Header File ID", 
+        DefaultLogger.Debug("Parsed ToC Header File ID", 
 			"FileID", header.FileID.Value,
 			"TypeID", header.TypeID.Value)
 
@@ -254,19 +172,20 @@ func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
 				return nil, errors.New(errMsg)
 			}
 
-			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 16))
+			err = reader.absoluteSeek(int64(header.ToCDataOffset.Value + 16))
 			if err != nil {
 				return nil, err
 			}
 
-			data := make([]byte, header.ToCDataSize.Value - 16)
-			_, err := reader.Read(data)
+            dataSize := header.ToCDataSize.Value - 16
+			data := make([]byte, dataSize, dataSize)
+			_, err := reader.read(data)
 			if err != nil {
 				return nil, err
 			}
 
-			banks[header.FileID.Value] = &WwiseSoundbank{
-				ToCDataSize: header.ToCDataSize.Value - 16,
+			banks[header.FileID.Value] = &ToCWwiseSoundbank{
+				ToCDataSize: dataSize,
 				ToCFileId: header.FileID.Value,
 				ToCDataOffset: header.ToCDataOffset.Value,
 			}
@@ -281,18 +200,18 @@ func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
 				return nil, errors.New(errMsg)
 			}
 
-			err = reader.AbsoluteSeek(int64(header.ToCDataOffset.Value + 4))
+			err = reader.absoluteSeek(int64(header.ToCDataOffset.Value + 4))
 			if err != nil {
 				return nil, err
 			}
 
-			size, _, err := reader.ReadUint32()
+			size, _, err := reader.readUint32()
 			if err != nil {
 				return nil, err
 			}
 
-			buf := make([]byte, size)
-			_, err = reader.Read(buf)
+			buf := make([]byte, size, size)
+			_, err = reader.read(buf)
 			if err != nil {
 				return nil, err
 			}
@@ -310,11 +229,18 @@ func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
 	 * In case of which Wwise Soundbank and Wwise Soundbank Dependencies are 
 	 * put in out of order
 	 * */
-	 logger.Info("", "banks", len(banks), "deps", len(bankDeps))
+	 DefaultLogger.Debug("Wwise Soundbank extraction result", 
+     "NumBanks", len(banks),
+     "NumDeps", len(bankDeps))
 	 for id, bank := range banks {
+         if bank == nil {
+             panic("Assertion failure. A nil Wwise Soundbank when organizing " +
+             "Wwise dependencies")
+         }
+
 		 bankDep, in := bankDeps[id]
 		 if !in {
-			 logger.Warn("A Wwise Soundbank without a Wwise Soundbank " +
+			 DefaultLogger.Warn("A Wwise Soundbank without a Wwise Soundbank " +
 			 "dependencies", "ToCFileID", id)
 			 continue
 		 }
@@ -324,81 +250,220 @@ func ExtractWwiseSoundbank(tocFile *os.File, rawData bool) (
     return banks, nil
 }
 
-func ParseToC(tocFile *os.File) (*ToCFile, error) {
-    reader := &StingRayAssetReader{ File: tocFile }
+// A helper function for opening up a game archive ToC file based on a given 
+// game data directory.
+// 
+// [return]
+// *os.File - nil when an error occur
+// error - trivial
+func openToCFile(gameArchiveID string) (*os.File, error) {
+	tocFilePath := path.Join(DATA, gameArchiveID)
 
-	ToC, err := ParseToCBasic(reader)
+	_, err := os.Stat(tocFilePath); 
+	if err != nil {
+        return nil, err
+	}
+
+	tocFile, err := os.Open(tocFilePath)
+	if err != nil {
+        return nil, err
+	}
+
+    return tocFile, nil
+}
+
+// [return]
+// *ToCFile - trivial. Nil when an error occur
+// error - trivial
+func parseToC(tocFile os.File) (*ToCFile, error) {
+    reader := &StingRayAssetReader{ file: tocFile }
+
+	ToC, err := parseToCBasic(reader)
 	if err != nil {
 		return nil, errors.Join(
 			errors.New("Failed to parse basic information of ToCFile"),
 			err)
 	}
 
-    err = reader.RelativeSeek(int64(32 * ToC.NumTypes.Value))
-    ToCStart := reader.Head
+    err = reader.relativeSeek(int64(32 * ToC.NumTypes.Value))
+    ToCStart := reader.head
 
-	logger.Debug("ToCStart Checkpoint",
+	DefaultLogger.Debug("ToCStart Checkpoint",
 		"Head", ToCStart,
 	)
     ToC.ToCEntries = make([]*ToCHeader, ToC.NumFiles.Value)
 
     for i := 0; i < int(ToC.NumFiles.Value); i++ {
-        if err = reader.AbsoluteSeek(ToCStart + int64(i) * 80); err != nil {
+        if err = reader.absoluteSeek(ToCStart + int64(i) * 80); err != nil {
             return nil, err
         }
-		ToCPrev := reader.Head
-        header, err := ParseToCHeader(reader)
+		ToCPrev := reader.head
+        header, err := parseToCHeader(reader)
         if err != nil {
             return nil, err
         }
-		logger.Debug("Head change",
+		DefaultLogger.Debug("Head change",
 			"Before", ToCPrev,
-			"After", reader.Head,
-			"Diff", reader.Head - ToCPrev,
+			"After", reader.head,
+			"Diff", reader.head - ToCPrev,
 		)
-        logger.Info("Parsed ToC Header File ID", "FileID", header.FileID)
+        DefaultLogger.Info("Parsed ToC Header File ID", "fileID", header.FileID)
 
         ToC.ToCEntries[i] = header
     }
     return ToC, err 
 }
 
-func ExtractBank(extractBankFlag *string) {
-	gameArchiveIDs := strings.Split(*extractBankFlag, ",")
+// Parsing logic for parsing the initial basic information in a game archive. 
+// This information typicall sit right before all ToC headers and ToC data.
+// All basic information will write into the given pointer of a struct that 
+// encasuplate the basic structure of a game archive ToC file.
+//
+// [return]
+// *ToCFile - a pointer of struct that encapsulate all information about the ToC 
+// file. Nil when an error occur
+func parseToCBasic(reader *StingRayAssetReader) (*ToCFile, error) {
+    ToC := ToCFile{}
 
-	for _, gameArchiveID := range gameArchiveIDs {
-		_, err := os.Stat(gameArchiveID); 
-		if err != nil {
-			if os.IsNotExist(err) {
-				logger.Error("Game archive ID " + gameArchiveID + " does not exist") 
-				continue
-			} else {
-				logger.Error("OS error", "error", err)
-				continue
-			}
-		}
+    var err error = nil
 
-		tocFile, err := os.Open(gameArchiveID)
-		if err != nil {
-			logger.Error("File open error", "error", err)
-			continue
-		}
-		defer tocFile.Close()
+	ToC.Magic.Value, ToC.Magic.Address, err = reader.readUint32()
+    if err != nil {
+        return nil, err
+    }
 
-		banks, err := ExtractWwiseSoundbank(tocFile, true)
-		if err != nil {
-			logger.Error("Failed to parse ToC File", "error", err)
-		}
-		
-		for id, bank := range banks {
-			if err = bank.exportToCHeader(); err != nil {
-				logger.Error("Failed to export ToC header", "ToCFileID", id, 
-				"error", err)
-			}
-			if err = bank.exportWwiserXML(); err != nil {
-				logger.Error("Failed to generate Wwiser XML", "TocFileID", id,
-				"error", err)
-			}
-		}
+    if ToC.Magic.Value != MAGIC {
+        return nil, errors.New("ToC file does not start with MAGIC number")
+    }
+	DefaultLogger.Debug("Readed MAGIC", 
+		"Magic", ToC.Magic.Value,
+		"Head", reader.head,
+	)
+
+	ToC.NumTypes.Value, ToC.NumTypes.Address, err = reader.readUint32()
+    if err != nil {
+        return nil, err
+    }
+	DefaultLogger.Debug("Readed NumTypes", 
+		"NumTypes", ToC.NumTypes.Value,
+		"Head", reader.head,
+	)
+
+	ToC.NumFiles.Value, ToC.NumFiles.Address, err = reader.readUint32()
+    if err != nil {
+        return nil, err
+    }
+	DefaultLogger.Debug("Readed NumFiles", 
+		"NumTypes", ToC.NumFiles,
+		"Head", reader.head,
+	)
+
+	ToC.Unknown.Value, ToC.Unknown.Address, err = reader.readUint32()
+    if err != nil {
+        return nil, err
+    }
+	DefaultLogger.Debug("Readed Unknown",
+		"Unknown", ToC.Unknown,
+		"Head", reader.head,
+	)
+
+	unk4Data := make([]byte, 56)
+	head, err := reader.read(unk4Data)
+    if err != nil {
+        return nil, err
+    }
+	for i, d := range unk4Data {
+		ToC.Unk4Data[i].Address = int64(i) + head
+		ToC.Unk4Data[i].Value = d
 	}
+
+	DefaultLogger.Debug("Readed Unk4Data", 
+		"Unk4Data", ToC.Unk4Data,
+		"Head", reader.head,
+	)
+
+	DefaultLogger.Debug("Basic Header Checkpoint",
+		"Head", reader.head,
+	)
+
+	return &ToC, nil
+}
+
+// Consume bytes from the file, and translate those bytes into a struct that 
+// encapsulate information of ToC header
+//
+// [return]
+// *ToCHeader - trivial. Nil when an error occurs
+// error - trivial
+func parseToCHeader(r *StingRayAssetReader) (*ToCHeader, error) {
+    var err error
+
+    header := &ToCHeader{}
+
+	header.FileID.Value, header.FileID.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.TypeID.Value, header.TypeID.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.ToCDataOffset.Value, header.ToCDataOffset.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.StreamFileOffset.Value, header.StreamFileOffset.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.GPUResourceOffset.Value, header.GPUResourceOffset.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.Unknown1.Value, header.Unknown1.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.Unknown2.Value, header.Unknown2.Address, err = r.readUint64()
+    if err != nil {
+        return nil, err
+    }
+
+	header.ToCDataSize.Value, header.ToCDataSize.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+	header.StreamSize.Value, header.StreamSize.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+	header.GPUResourceSize.Value, header.GPUResourceSize.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+	header.Unknown3.Value, header.Unknown3.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+	header.Unknown4.Value, header.Unknown4.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+	header.EntryIndex.Value, header.EntryIndex.Address, err = r.readUint32()
+    if err != nil {
+        return nil, err
+    }
+
+    return header, nil
 }

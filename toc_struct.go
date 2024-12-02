@@ -10,6 +10,8 @@ import (
 
 const MAGIC = 4026531857
 
+var DATA string
+
 /*
  * ToC Header type constance
  * */
@@ -64,19 +66,15 @@ type MediaHeader struct {
 	Size uint32
 }
 
-type WwiseSoundbank struct {
+type ToCWwiseSoundbank struct {
 	ToCDataSize uint32 `json:"ToCDataSize"`
 	ToCFileId uint64 `json:"ToCFileId"`
 	ToCDataOffset uint64 `json:"ToCDataOffset"`
 	PathName string `json:"PathName"`
-	ReadableName string `json:"ReadableName"`
 	RawData []byte `json:"-"`
-	MediaHeaders []*MediaHeader `json:"-"`
-	Categories map[string]struct{} `json:"-"`
-	LinkedGameArchiveIds map[string]struct{} `json:"-"`
 }
 
-func (w *WwiseSoundbank) exportToCHeader() error { var filename string
+func (w *ToCWwiseSoundbank) exportToCHeader() error { var filename string
 	if w.PathName == "" {
 		filename = fmt.Sprintf("%d", w.ToCFileId)
 	} else {
@@ -107,7 +105,7 @@ func (w *WwiseSoundbank) exportToCHeader() error { var filename string
 	return nil
 }
 
-func (w *WwiseSoundbank) exportWwiserXML() error {
+func (w *ToCWwiseSoundbank) exportWwiserXML(removeBinaryFile bool) error {
 	w.RawData[0x08] = 0x8D
 	w.RawData[0x09] = 0x00
 	w.RawData[0x0A] = 0x00
@@ -120,11 +118,27 @@ func (w *WwiseSoundbank) exportWwiserXML() error {
 	} else {
 		filename = w.PathName
 	}
+    // filename = path.Join("xmls", filename)
 
+    // _, err := os.Stat("xmls")
+    // if err != nil {
+    //     if errors.Is(err, os.ErrNotExist) {
+    //         if err := os.Mkdir("xmls", 0644); err != nil {
+    //             return err
+    //         }
+    //     } else {
+    //         return err
+    //     }
+    // }
+    
 	bankFile, err := os.OpenFile(
 		filename, os.O_WRONLY | os.O_CREATE, 0644,
 	)
 	if err != nil {
+        if errors.Is(err, os.ErrExist) {
+            panic("Revisiting soundbank since there are name confliction")
+        }
+
 		return errors.Join(
 			errors.New("Failed to create a empty file for Wwise soundbank"),
 			err,
@@ -147,14 +161,22 @@ func (w *WwiseSoundbank) exportWwiserXML() error {
 		)
 	}
 	
-	cmd := exec.Command("python3", "wwiser.pyz", filename)
+	cmd := exec.Command("python", "wwiser.pyz", filename)
 	if err = cmd.Run(); err != nil {
 		return errors.Join(
 			errors.New("Failed to generate Wwiser XML output"), 
 			err)
 	}
 
+    if removeBinaryFile {
+        os.Remove(filename)
+    }
+
 	return nil
+}
+
+func (w *ToCWwiseSoundbank) deleteRawData() {
+    w.RawData = nil
 }
 
 type WwiseSoundbankDep struct {

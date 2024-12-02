@@ -6,9 +6,11 @@ import (
 	"os"
 )
 
+type Empty struct {}
+
 func run() error {
 	if len(os.Args) > 3 {
-		logger.Error("Only one option can run at the same time")
+		DefaultLogger.Error("Only one option can run at the same time")
 	}
 
 	dataPathFlag := flag.String("data", "", 
@@ -32,31 +34,43 @@ func run() error {
 
 	xmlFlag := flag.String("xmls", "", "")
 
+    if *dataPathFlag != "" {
+        DATA = *dataPathFlag
+    } else {
+        DATA = os.Getenv("HELLDIVER2_DATA")
+    }
+
+    CSV_DIR = os.Getenv("CSV_DIR")
+    if CSV_DIR == "" {
+        CSV_DIR = "./csv/archives/"
+    }
+
 	flag.Parse()
 
 	ctx := context.Background()
 
 	if *archiveTableFlag {
+        if err := updateHelldiverHirearchyObjectType(ctx); err != nil {
+            return err
+        }
 		return updateHelldiverGameArchives("./csv/archives", ctx)
 	}
 
 	if *bankTableFlag {
-		return updateHelldiverSoundbanks(*dataPathFlag, ctx)
+		return updateHelldiverSoundAssets(ctx)
 	}
 
 	if *streamTableFlag {
-		return updateHelldiverStreams(*dataPathFlag, ctx)
+		return updateHelldiverStreams(ctx)
 	}
 
 	if *extractBankFlag != "" {
-		logger.Debug("Option selected: extract-bank")
-		ExtractBank(extractBankFlag)
+		extractBank(*extractBankFlag)
 		return nil
 	}
 
 	if *xmlFlag != "" {
-		logger.Debug("Option selected: Wwiser XML parsing")
-		return ParseWwiseXML(xmlFlag)
+		return parseWwiserXML(*xmlFlag)
 	}
 
 	flag.Usage()
@@ -66,7 +80,7 @@ func run() error {
 
 func main() {
 	if err := run(); err != nil {
-		logger.Error("Error", "error_detail", err)
+		DefaultLogger.Error("Error", "error_detail", err)
 		os.Exit(1)
 	}
 	os.Exit(0)

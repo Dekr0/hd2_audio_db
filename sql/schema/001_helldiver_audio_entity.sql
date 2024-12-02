@@ -9,7 +9,7 @@ CREATE TABLE helldiver_game_archive (
 CREATE TABLE helldiver_soundbank (
     id TEXT PRIMARY KEY,
     toc_file_id TEXT NOT NULL UNIQUE,
-    sonndbank_path_name TEXT NOT NULL UNIQUE,
+    soundbank_path_name TEXT NOT NULL UNIQUE,
     soundbank_readable_name TEXT NOT NULL,
     categories TEXT NOT NULL,
     linked_game_archive_ids TEXT NOT NULL
@@ -25,6 +25,7 @@ CREATE TABLE helldiver_hirearchy_object (
     wwise_object_id TEXT NOT NULL UNIQUE,
     type TEXT NOT NULL,
     parent_wwise_object_id TEXT NOT NULL,
+    linked_soundbank_ids TEXT NOT NULL,
     FOREIGN KEY (type) REFERENCES helldiver_hirearchy_object_type(id)
 );
 
@@ -39,7 +40,6 @@ CREATE TABLE helldiver_audio_source (
     wwise_short_id TEXT NOT NULL UNIQUE,
     label TEXT NOT NULL,
     tags TEXT NOT NULL,
-    linked_soundbank_ids TEXT NOT NULL,
     FOREIGN KEY (id) REFERENCES helldiver_hirearchy_object(id)
 );
 

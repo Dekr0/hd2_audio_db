@@ -12,8 +12,15 @@ const (
 	TYPE_CAKRANSEQCNTR = 0x11
 )
 
+var HIREARCHY_TYPE_NAME []string = []string{
+    "Sound",
+    "Random / Sequence Controller",
+}
+
 type CAkObjElement struct {
-	Name string
+    XMLName xml.Name `xml:"obj" json:"XMLName"`
+    Name string `xml:"na,attr" json:"Name"`
+    Index string `xml:"ix,attr" json:"Index"`
 }
 
 type CAkFldElement struct {
@@ -21,6 +28,7 @@ type CAkFldElement struct {
 	Name string `xml:"na,attr" json:"Name"`
 	Type string `xml:"ty,attr" json:"Type"`
 	Value string `xml:"va,attr" json:"Value"`
+    ValueF string `xml:"vf,attr" json:"ValueF"`
 }
 
 type CAkChildrenElement struct {
@@ -38,7 +46,9 @@ type CAkMediaIndex struct {
 }
 
 type CAkObject interface {
-	GetObjectULID() uint32
+    getDirectParentID() uint32 
+	getObjectULID() uint32
+    getType() string
 	Marshal() []byte /** This is unused. Experimental */
 }
 
@@ -54,11 +64,12 @@ type CAkObject interface {
  */
 type CAkHirearchy struct {
 	CAkObjects map[uint32]CAkObject `json:"CAkObj"`
-	ReferencedSounds map[uint32]*CAkSound `json:"CrossSharedSounds"`
+	ReferencedSounds map[uint32]*CAkSound `json:"CrossSharedSounds"` // Potentially contain nil Sound object
 	Sounds map[uint32]*CAkSound `json:"Sounds"`
 	RanSeqCntrs map[uint32]*CAkRanSeqCntr `json:"RanSeqCntrs"`
 }
 
+// Unused
 func (h *CAkHirearchy) Marshal() []byte {
 	size := 
 		4 +
@@ -113,9 +124,22 @@ func (h *CAkHirearchy) Marshal() []byte {
  * Total Size     
  * */
 type CAkRanSeqCntr struct {
-	DirectParentObjectULID uint32 `json:"DirectParentObjectULID"`
-	CAkSounds map[uint32]*CAkSound `json:"CAkSounds"`
+    DirectParentObjectULID uint32 `json:"DirectParentObjectULID"`
 	ObjectULID uint32 `json:"ObjectULID"`
+    ObjectIndex int32 `json:"ObjectIndex"`
+    CAkSounds map[uint32]*CAkSound `json:"CAkSounds"`
+}
+
+func (r *CAkRanSeqCntr) getDirectParentID() uint32 {
+    return r.DirectParentObjectULID
+}
+
+func (r *CAkRanSeqCntr) getObjectULID() uint32 {
+	return r.ObjectULID
+}
+
+func (r *CAkRanSeqCntr) getType() string {
+    return HIREARCHY_TYPE_NAME[1]
 }
 
 func (r *CAkRanSeqCntr) Marshal() []byte {
@@ -141,10 +165,6 @@ func (r *CAkRanSeqCntr) Marshal() []byte {
 	return buf
 }
 
-func (r *CAkRanSeqCntr) GetObjectULID() uint32 {
-	return r.ObjectULID
-}
-
 
 /**
  * DirectParentID uint32
@@ -157,19 +177,29 @@ func (r *CAkRanSeqCntr) GetObjectULID() uint32 {
 const CAKSOUND_SIZE = 13
 
 type CAkSound struct {
-	DirectParentID uint32 `json:"DirectParentID"`
+    Foreign bool `json:"Foregin"`
+	DirectParentObjectULID uint32 `json:"DirectParentID"`
+    ObjectULID uint32 `json:"ObjectULID"`
+    ObjectIndex int32 `json:"ObjectIndex"`
 	SourceShortID uint32 `json:"SourceShortID"`
-	ObjectULID uint32 `json:"ObjectULID"`
-	Foreign bool `json:"CrossShared"`
 }
 
-func (s *CAkSound) GetObjectULID() uint32 {
+func (s *CAkSound) getDirectParentID() uint32 {
+    return s.DirectParentObjectULID
+}
+
+func (s *CAkSound) getObjectULID() uint32 {
 	return s.ObjectULID
 }
 
+func (s *CAkSound) getType() string {
+    return HIREARCHY_TYPE_NAME[0]
+}
+
+// Unused
 func (s *CAkSound) Marshal() []byte {
 	buf := []byte{}
-	buf = binary.LittleEndian.AppendUint32(buf, s.DirectParentID)
+	buf = binary.LittleEndian.AppendUint32(buf, s.DirectParentObjectULID)
 	buf = binary.LittleEndian.AppendUint32(buf, s.SourceShortID)
 	buf = binary.LittleEndian.AppendUint32(buf, s.ObjectULID)
 	if s.Foreign {
