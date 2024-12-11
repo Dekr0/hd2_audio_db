@@ -1,12 +1,12 @@
 -- +goose Up
-CREATE TABLE helldiver_game_archive (
+CREATE TABLE game_archive (
     id TEXT PRIMARY KEY,
     game_archive_id TEXT NOT NULL UNIQUE,
     tags TEXT NOT NULL,
     categories TEXT NOT NULL
 );
 
-CREATE TABLE helldiver_soundbank (
+CREATE TABLE soundbank (
     id TEXT PRIMARY KEY,
     toc_file_id TEXT NOT NULL UNIQUE,
     soundbank_path_name TEXT NOT NULL UNIQUE,
@@ -15,35 +15,37 @@ CREATE TABLE helldiver_soundbank (
     linked_game_archive_ids TEXT NOT NULL
 );
 
-CREATE TABLE helldiver_hirearchy_object_type (
+CREATE TABLE hirearchy_object_type (
     id TEXT PRIMARY KEY,
     type TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE helldiver_hirearchy_object (
+CREATE TABLE hirearchy_object (
     id TEXT PRIMARY KEY,
     wwise_object_id TEXT NOT NULL UNIQUE,
     type TEXT NOT NULL,
     parent_wwise_object_id TEXT NOT NULL,
-    linked_soundbank_ids TEXT NOT NULL,
-    FOREIGN KEY (type) REFERENCES helldiver_hirearchy_object_type(id)
+    linked_soundbank_path_names TEXT NOT NULL,
+    FOREIGN KEY (type) REFERENCES hirearchy_object_type(id)
 );
 
-CREATE TABLE helldiver_random_seq_container (
+CREATE TABLE random_seq_container (
     id TEXT PRIMARY KEY,
-    sounds TEXT NOT NULL,
-    FOREIGN KEY (id) REFERENCES helldiver_hirearchy_object(id)
-);
-
-CREATE TABLE helldiver_audio_source (
-    id PRIMARY KEY,
-    wwise_short_id TEXT NOT NULL UNIQUE,
     label TEXT NOT NULL,
     tags TEXT NOT NULL,
-    FOREIGN KEY (id) REFERENCES helldiver_hirearchy_object(id)
+    FOREIGN KEY (id) REFERENCES hirearchy_object(id)
 );
 
-CREATE TABLE helldiver_wwise_stream (
+CREATE TABLE sound (
+    id TEXT NOT NULL,
+    wwise_short_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    tags TEXT NOT NULL,
+    PRIMARY KEY (id, wwise_short_id),
+    FOREIGN KEY (id) REFERENCES hirearchy_object(id)
+);
+
+CREATE TABLE wwise_stream (
     id PRIMARY KEY,
     toc_file_id TEXT NOT NULL UNIQUE,
     label TEXT NOT NULL,
@@ -52,10 +54,10 @@ CREATE TABLE helldiver_wwise_stream (
 );
 
 -- +goose Down
-DROP TABLE helldiver_wwise_stream;
-DROP TABLE helldiver_audio_source;
-DROP TABLE helldiver_random_seq_container;
-DROP TABLE helldiver_soundbank;
-DROP TABLE helldiver_hirearchy_object;
-DROP TABLE helldiver_hirearchy_object_type;
-DROP TABLE helldiver_game_archive;
+DROP TABLE wwise_stream;
+DROP TABLE sound;
+DROP TABLE random_seq_container;
+DROP TABLE soundbank;
+DROP TABLE hirearchy_object;
+DROP TABLE hirearchy_object_type;
+DROP TABLE game_archive;
