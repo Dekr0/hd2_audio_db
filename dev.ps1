@@ -16,6 +16,10 @@ function ParseBankXMLDev {
     go run . -xmls="$xml"
 }
 
+function CleanXML {
+    Remove-Item '.\*.xml'
+}
+
 function TestTableArchive() {
     go run . -table-archive >> log.txt
 }
