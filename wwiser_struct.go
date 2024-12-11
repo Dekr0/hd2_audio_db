@@ -14,7 +14,7 @@ const (
 
 var HIREARCHY_TYPE_NAME []string = []string{
     "Sound",
-    "Random / Sequence Controller",
+    "Random / Sequence Container",
 }
 
 type CAkObjElement struct {
@@ -181,7 +181,7 @@ type CAkSound struct {
 	DirectParentObjectULID uint32 `json:"DirectParentID"`
     ObjectULID uint32 `json:"ObjectULID"`
     ObjectIndex int32 `json:"ObjectIndex"`
-	SourceShortID uint32 `json:"SourceShortID"`
+	ShortIDs map[uint32]Empty `json:"SourceShortID"`
 }
 
 func (s *CAkSound) getDirectParentID() uint32 {
@@ -200,7 +200,7 @@ func (s *CAkSound) getType() string {
 func (s *CAkSound) Marshal() []byte {
 	buf := []byte{}
 	buf = binary.LittleEndian.AppendUint32(buf, s.DirectParentObjectULID)
-	buf = binary.LittleEndian.AppendUint32(buf, s.SourceShortID)
+	// buf = binary.LittleEndian.AppendUint32(buf, s.ShortID)
 	buf = binary.LittleEndian.AppendUint32(buf, s.ObjectULID)
 	if s.Foreign {
 		buf = append(buf, 1)
