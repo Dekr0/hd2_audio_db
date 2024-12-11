@@ -217,7 +217,7 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
 // CAkSound. Nil only when the object ULID cannot be obtained.
 // error - trivial
 func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
-	sound := CAkSound{ false, 0, 0, 0, 0 }
+	sound := CAkSound{ false, 0, 0, 0, make(map[uint32]Empty) }
 
 	var err error
 
@@ -255,7 +255,7 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
                 if err != nil {
                     return &sound, err
                 }
-                sound.SourceShortID = uint32(v)
+                sound.ShortIDs[uint32(v)] = Empty{}
                 break
            } 
 
