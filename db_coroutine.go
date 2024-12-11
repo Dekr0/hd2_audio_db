@@ -14,8 +14,8 @@ import (
 // [channel passing]
 // *ExtractBankResult - Never nil
 //   - result - nil only when openToCFile error or extractWwiseSoundbanks error 
-func extractSoundbankTask(gameArchiveID string, c chan *ExtractBankResult) {
-	payload := &ExtractBankResult{ gameArchiveID: gameArchiveID }
+func extractSoundbankTask(gameArchiveID string, c chan *BankExtractTaskResult) {
+	payload := &BankExtractTaskResult{ gameArchiveID: gameArchiveID }
 	tocFile, err := openToCFile(gameArchiveID)
 	if err != nil {
 		payload.err = err

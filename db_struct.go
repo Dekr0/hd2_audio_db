@@ -11,10 +11,16 @@ type DBToCWwiseSoundbank struct {
 type DBCAkObject struct {
     dbid string
     ref CAkObject
-    linkedSoundbankDBIDs map[string]Empty
+    linkedSoundbankPathNames map[string]Empty
 }
 
-type ExtractBankResult struct {
+type HireachyResult struct {
+    uniqueObjs map[uint32]*DBCAkObject
+    uniqueSounds map[uint32]*CAkSound
+    uniqueCntrs map[uint32]*CAkRanSeqCntr
+}
+
+type BankExtractTaskResult struct {
     gameArchiveID string
     result map[uint64]*ToCWwiseSoundbank
     err error
