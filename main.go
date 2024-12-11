@@ -50,18 +50,18 @@ func run() error {
 	ctx := context.Background()
 
 	if *archiveTableFlag {
-        if err := updateHelldiverHirearchyObjectType(ctx); err != nil {
+        if err := rewriteAllHirearchyObjectTypes(ctx); err != nil {
             return err
         }
-		return updateHelldiverGameArchives("./csv/archives", ctx)
+		return rewriteAllGameArchives("./csv/archives", ctx)
 	}
 
 	if *bankTableFlag {
-		return updateHelldiverSoundAssets(ctx)
+		return rewriteAllSoundAssets(ctx)
 	}
 
 	if *streamTableFlag {
-		return updateHelldiverStreams(ctx)
+		return rewriteAllWwiseStreams(ctx)
 	}
 
 	if *extractBankFlag != "" {
