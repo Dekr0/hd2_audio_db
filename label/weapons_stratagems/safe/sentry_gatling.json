@@ -1,31 +1,24 @@
 {
-    "v": 2,
-    "specs": [
-        {
-            "workspace": "",
-            "mapping": {
-                "fire_core_loop_01": "415062923",
-                "fire_core_loop_02": "155041360",
-                "fire_core_loop_03": "159869488",
-                "fire_core_loop_04": "101137775",
-                "rotor_start_01": "725999846",
-                "rotor_start_02": "894949674",
-                "rotor_start_03": "587034285",
-                "rotor_start_04": "199721999",
-                "fire_start_01": "747494403",
-                "fire_start_02": "397107182",
-                "fire_start_03": "43560270",
-                "fire_start_04": "598161037",
-                "rotor_end_01": "176071137",
-                "rotor_end_02": "150128688",
-                "rotor_end_03": "120052619",
-                "rotor_end_04": "115005708",
-                "fire_tail_01": "1071275498",
-                "fire_tail_02": "981170536",
-                "fire_tail_03": "298733928",
-                "fire_tail_04": "602030092"
-            },
-            "write_patch_to": ""
-        }
-    ]
+    "sources": {
+        "sentry_gatling_transient_loop_01": "415062923",
+        "sentry_gatling_transient_loop_02": "155041360",
+        "sentry_gatling_transient_loop_03": "159869488",
+        "sentry_gatling_transient_loop_04": "101137775",
+        "sentry_gatling_rotor_start_01": "725999846",
+        "sentry_gatling_rotor_start_02": "894949674",
+        "sentry_gatling_rotor_start_03": "587034285",
+        "sentry_gatling_rotor_start_04": "199721999",
+        "sentry_gatling_transient_start_01": "747494403",
+        "sentry_gatling_transient_start_02": "397107182",
+        "sentry_gatling_transient_start_03": "43560270",
+        "sentry_gatling_transient_start_04": "598161037",
+        "sentry_gatling_rotor_end_01": "176071137",
+        "sentry_gatling_rotor_end_02": "150128688",
+        "sentry_gatling_rotor_end_03": "120052619",
+        "sentry_gatling_rotor_end_04": "115005708",
+        "sentry_gatling_tail_01": "1071275498",
+        "sentry_gatling_tail_02": "981170536",
+        "sentry_gatling_tail_03": "298733928",
+        "sentry_gatling_tail_04": "602030092"
+    }
 }

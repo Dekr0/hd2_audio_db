@@ -1,52 +1,54 @@
 {
-    "artillery_subsonic_far_01": "415321394",
-    "artillery_subsonic_far_02": "876981405",
-    "artillery_subsonic_far_03": "551743021",
-    "artillery_subsonic_far_04": "274833177",
-
-    "artillery_subsonic_close_01": "428088150",
-    "artillery_subsonic_close_02": "344911197",
-    "artillery_subsonic_close_03": "119389814",
-    "artillery_subsonic_close_04": "775406058",
-    "artillery_subsonic_close_05": "703314528",
-    "artillery_subsonic_close_06": "31389174",
-
-    "artillery_incoming_01": "347691022",
-    "artillery_incoming_02": "866012595",
-    "artillery_incoming_03": "27103544",
-    "artillery_incoming_04": "415950180",
-    "artillery_incoming_05": "447966014",
-    "artillery_incoming_06": "874953246",
-
-    "medium_rock_rolling_down_dry_01": "559384837",
-    "medium_rock_rolling_down_dry_02": "786225980",
-    "medium_rock_rolling_down_dry_03": "1018550155",
-    "medium_rock_rolling_down_dry_04": "387644998",
-    "medium_rock_rolling_down_dry_05": "460835894",
-    "medium_rock_rolling_down_dry_06": "697797177",
-
-    "small_rocks_rolling_down_01": "943443472",
-    "small_rocks_rolling_down_02": "985174677",
-    "small_rocks_rolling_down_03": "572790153",
-    "small_rocks_rolling_down_04": "402835427",
-    "small_rocks_rolling_down_05": "220580906",
-
-    "impact_bass_01": "299940309",
-    "impact_bass_02": "167734892",
-    "impact_bass_03": "841858109",
-    "impact_bass_04": "243974915",
-    "impact_bass_05": "929237342",
-    "impact_bass_06": "524825455",
-
-    "impact_core_01": "84843613",
-    "impact_core_02": "154940815",
-    "impact_core_03": "741090669",
-    "impact_core_04": "663028978",
-    "impact_core_05": "1024807697",
-    "impact_core_06": "706393430",
-
-    "unknown_01": "409402696",
-    "unknown_02": "701250273",
-    "unknown_03": "972359172",
-    "unknown_04": "964299079"
+    "sources": {
+        "380mm_warhead_subsonic_far_01": "415321394",
+        "380mm_warhead_subsonic_far_02": "876981405",
+        "380mm_warhead_subsonic_far_03": "551743021",
+        "380mm_warhead_subsonic_far_04": "274833177",
+    
+        "380mm_warhead_subsonic_close_01": "428088150",
+        "380mm_warhead_subsonic_close_02": "344911197",
+        "380mm_warhead_subsonic_close_03": "119389814",
+        "380mm_warhead_subsonic_close_04": "775406058",
+        "380mm_warhead_subsonic_close_05": "703314528",
+        "380mm_warhead_subsonic_close_06": "31389174",
+    
+        "380mm_warhead_incoming_01": "347691022",
+        "380mm_warhead_incoming_02": "866012595",
+        "380mm_warhead_incoming_03": "27103544",
+        "380mm_warhead_incoming_04": "415950180",
+        "380mm_warhead_incoming_05": "447966014",
+        "380mm_warhead_incoming_06": "874953246",
+    
+        "380mm_env_destruction_large_01": "559384837",
+        "380mm_env_destruction_large_02": "786225980",
+        "380mm_env_destruction_large_03": "1018550155",
+        "380mm_env_destruction_large_04": "387644998",
+        "380mm_env_destruction_large_05": "460835894",
+        "380mm_env_destruction_large_06": "697797177",
+    
+        "380mm_env_destruction_small_01": "943443472",
+        "380mm_env_destruction_small_02": "985174677",
+        "380mm_env_destruction_small_03": "572790153",
+        "380mm_env_destruction_small_04": "402835427",
+        "380mm_env_destruction_small_05": "220580906",
+    
+        "380mm_impact_lfe_01": "299940309",
+        "380mm_impact_lfe_02": "167734892",
+        "380mm_impact_lfe_03": "841858109",
+        "380mm_impact_lfe_04": "243974915",
+        "380mm_impact_lfe_05": "929237342",
+        "380mm_impact_lfe_06": "524825455",
+    
+        "380mm_impact_close_01": "84843613",
+        "380mm_impact_close_02": "154940815",
+        "380mm_impact_close_03": "741090669",
+        "380mm_impact_close_04": "663028978",
+        "380mm_impact_close_05": "1024807697",
+        "380mm_impact_close_06": "706393430",
+    
+        "380mm_unknown_sfx_01": "409402696",
+        "380mm_unknown_sfx_02": "701250273",
+        "380mm_unknown_sfx_03": "972359172",
+        "380mm_unknown_sfx_04": "964299079"
+    }
 }

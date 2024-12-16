@@ -1,15 +1,17 @@
 {
-    "tail_01": "9151966",
-    "tail_02": "22660763",
-    "tail_03": "1021066563",
-    "tail_04": "438878029",
-    "tail_05": "179795789",
-    "tail_06": "1032429875",
-
-    "transient_kick_01": "643216271",
-    "transient_kick_02": "273244713",
-    "transient_kick_03": "860091052",
-    "transient_kick_04": "306126172",
-    "transient_kick_05": "873553918",
-    "transient_kick_06": "257164922"
+    "sources": {
+        "guard_dog_tail_01": "9151966",
+        "guard_dog_tail_02": "22660763",
+        "guard_dog_tail_03": "1021066563",
+        "guard_dog_tail_04": "438878029",
+        "guard_dog_tail_05": "179795789",
+        "guard_dog_tail_06": "1032429875",
+    
+        "guard_dog_transient_kick_01": "643216271",
+        "guard_dog_transient_kick_02": "273244713",
+        "guard_dog_transient_kick_03": "860091052",
+        "guard_dog_transient_kick_04": "306126172",
+        "guard_dog_transient_kick_05": "873553918",
+        "guard_dog_transient_kick_06": "257164922"
+    }
 }

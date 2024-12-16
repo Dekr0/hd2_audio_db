@@ -1,6 +1,8 @@
 {
-    "fire_loop_01": "213803787",
-    "fire_loop_02": "698241077",
-    "fire_loop_03": "14529500",
-    "fire_loop_04": "216874528"
+    "sources": {
+        "mg_sentry_fire_loop_01": "213803787",
+        "mg_sentry_fire_loop_02": "698241077",
+        "mg_sentry_fire_loop_03": "14529500",
+        "mg_sentry_fire_loop_04": "216874528"
+    }
 }
