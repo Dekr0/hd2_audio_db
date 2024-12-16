@@ -20,15 +20,39 @@ function CleanXML {
     Remove-Item '.\*.xml'
 }
 
-function TestTableArchive() {
+function TestTableArchive {
+    rm log.txt
     go run . -table-archive >> log.txt
 }
 
-function TestTableBank() {
+function TestTableArchiveAll {
+    rm log.txt
+    go run . -table-archive-all >> log.txt
+}
+
+function TestTableBankAll {
+    rm log.txt
     go run . -table-bank >> log.txt
 }
 
-function TestTableAll() {
-    go run . -table-archive
-    go run . -table-bank
+function TestTableSoundAssets {
+    rm log.txt
+    go run . -table-sound-asset >> log.txt
+    CleanXML
+}
+
+function CreateSoundView {
+    Get-Content ./sql/view.sql | sqlite3.exe database
+}
+
+function UpdateLabel {
+    param (
+        $json_files
+    )
+
+    go run . -table-label="$json_files"
+}
+
+function DryRun {
+    UpdateLabel -json_files "label/weapons_stratagems/safe/120mm.json;label/weapons_stratagems/safe/380mm.json;label/weapons_stratagems/safe/500kg.json"
 }
