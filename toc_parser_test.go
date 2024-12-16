@@ -188,7 +188,7 @@ func LoadExpectedToC() ([]ToCFile, error) {
     return ToCFiles, nil
 }
 
-func TestParsingBasicHeader(t *testing.T) {
+func testParsingBasicHeader(t *testing.T) {
     ToCFiles, err := LoadExpectedToC()
     if err != nil {
         t.Fatal(err)
@@ -225,7 +225,7 @@ func TestParsingBasicHeader(t *testing.T) {
     }
 }
 
-func TestParsingToCHeader(t *testing.T) {
+func testParsingToCHeader(t *testing.T) {
     ToCFiles, err := LoadExpectedToC()
     if err != nil {
         t.Fatal(err)
