@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"encoding/xml"
 	"errors"
 	"fmt"
@@ -11,65 +11,70 @@ import (
 	"strings"
 )
 
-// Decoding logic when a StartElement <obj na="..." ix="..."> is encountered
-// Attribute `na` and `ix` is not necessary always there for every StartElement
-// <obj>. `na` typicall occurs for every StartElement <obj>
-//
-// [return]
-// *CAkObjElement - a pointer of struct that encapsulate <obj na="..." ix="...">
-// Nil when an error occurs.
-// error - trivial
-func decodeCAkObjectStartElement(e *xml.StartElement) (*CAkObjElement, error) {
-    if e.Name.Local != "obj" {
-        return nil, errors.New("This is not a <obj> element.")
+/*
+Decoding logic when a StartElement <object name="..." index="..."> is encountered
+Attribute `name` and `index` is not necessary always there for every StartElement
+<object>. `name` typical occurs for every StartElement <object>
+
+[return]
+*CAkObjElement - a pointer of struct that encapsulate <object name="..." index="...">
+Nil when an error occurs.
+error - trivial
+*/
+func decodeCAkObjectStartElement(e *xml.StartElement) (*CAkObjectElement, error) {
+    if e.Name.Local != "object" {
+        return nil, errors.New("This is not a <object> element.")
     }
 
-    obj := &CAkObjElement{
-        XMLName: xml.Name{ Space: "", Local: "obj" },
+    object := &CAkObjectElement{
+        XMLName: xml.Name{ Space: "", Local: "object" },
     }
     for _, a := range e.Attr {
         switch a.Name.Local {
-        case "na":
-            obj.Name = a.Value
-        case "ix":
-            obj.Index = a.Value
+        case "name":
+            object.Name = a.Value
+        case "index":
+            object.Index = a.Value
         }
     }
     
-    return obj, nil
+    return object, nil
 }
 
-// Decoding logic when a StartElement <fld ty="..." na="..." va="..." vf="..."> is 
-// encountered. Not all attributes are always there for every StartElement 
-// <fld>. `ty`, `na`, and `va` typicall occur for every StartElement <fld>
-//
-// [return]
-// *CAkObjElement - a pointer of struct that encapsulate <fld ...>. Nil when an 
-// error occurs.
-// error - trivial
-func decodeCAkFldStartElement(e *xml.StartElement) (*CAkFldElement, error) {
-    if e.Name.Local != "fld" {
-        return nil, errors.New("This is not a <fld> element")
+/*
+Decoding logic when a StartElement <field type="..." name="..." value="..." 
+valuefmt="..."> is encountered. Not all attributes are always there for every 
+StartElement <field>. `type`, `name`, and `value` typical occur for every 
+StartElement <field>
+
+[return]
+*CAkObjElement - a pointer of struct that encapsulate <field ...>. Nil when an 
+error occurs.
+error - trivial
+*/
+func decodeCAkFldStartElement(e *xml.StartElement) (*CAkFieldElement, error) {
+    if e.Name.Local != "field" {
+        return nil, errors.New("This is not a <field> element")
     }
 
-    fld := &CAkFldElement{
-        XMLName: xml.Name{ Space: "", Local: "fld" },
+    field := &CAkFieldElement{
+        XMLName: xml.Name{ Space: "", Local: "field" },
     }
 
     for _, a := range e.Attr {
         switch a.Name.Local {
-        case "na":
-            fld.Name = a.Value
-        case "ty":
-            fld.Type = a.Value
-        case "va":
-            fld.Value = a.Value
-        case "vf":
-            fld.ValueF = a.Value
+        case "name":
+            field.Name = a.Value
+        case "type":
+            field.Type = a.Value
+        case "value":
+            field.Value = a.Value
+        case "valuefmt":
+            field.ValueF = a.Value
         }
     }
 
-    return fld, nil
+    return field, nil
 }
 
 // Parsing logic for obtaining the ULID (uint32) for a CAkObject.
@@ -86,17 +91,17 @@ func getCAkObjectULID(decoder *xml.Decoder) (uint32, error) {
 
 		switch element := token.(type) {
 		case xml.StartElement:
-            if element.Name.Local != "fld" {
+            if element.Name.Local != "field" {
                 continue
             }
 
-            fld, err := decodeCAkFldStartElement(&element)
+            field, err := decodeCAkFldStartElement(&element)
             if err != nil {
                 return 0, err
             }
 
-            if fld.Type == "sid" && fld.Name == "ulID" {
-                v, err := strconv.ParseInt(fld.Value, 10, 32)
+            if field.Type == "sid" && field.Name == "ulID" {
+                v, err := strconv.ParseInt(field.Value, 10, 32)
                 if err != nil {
                     return 0, err
                 }
@@ -107,14 +112,16 @@ func getCAkObjectULID(decoder *xml.Decoder) (uint32, error) {
 	}
 }
 
-// Parsing logic for when a StartElement <obj na="CAkRanSeqCntr"> is encounted.
-// It only extract some basic information and all the ULID of its children 
-// CAkobjects.
-// 
-// [return]
-// *CAkRanSeqCntr - a pointer to a struct that encapsulates partial information 
-// about CAkRanSeqCntr. Nil only when object ULID cannon be obtained
-// error - trivial
+/*
+Parsing logic for when a StartElement <object na="CAkRanSeqCntr"> is encounted.
+It only extract some basic information and all the ULID of its children 
+CAkobjects.
+
+[return]
+*CAkRanSeqCntr - a pointer to a struct that encapsulates partial information 
+about CAkRanSeqCntr. Nil only when object ULID cannon be obtained
+error - trivial
+*/
 func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
 	*CAkRanSeqCntr, error) {
 	var err error
@@ -129,8 +136,10 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
         )
 	}
 
-    // Once <obj na="Children"> is parsed, it will immedately return.
-    // <fld na="DirectParentID"> typically occurs before <obj na="Children">
+    /* 
+    Once <object na="Children"> is parsed, it will immedately return.
+    <field na="DirectParentID"> typically occurs before <object name="Children">
+     */
 	for {
 		token, err := decoder.Token()
 		if err != nil {
@@ -139,17 +148,17 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
 
 		switch element := token.(type) {
 		case xml.StartElement:
-            if element.Name.Local == "fld" {
-                fld, err := decodeCAkFldStartElement(&element)
+            if element.Name.Local == "field" {
+                field, err := decodeCAkFldStartElement(&element)
                 if err != nil {
                     return &cntr, nil
                 }
 
-                if fld.Type != "tid" || fld.Name != "DirectParentID" {
+                if field.Type != "tid" || field.Name != "DirectParentID" {
                     continue
                 }
 
-                v, err := strconv.ParseInt(fld.Value, 10, 32)
+                v, err := strconv.ParseInt(field.Value, 10, 32)
                 if err != nil {
                     return &cntr, err
                 }
@@ -159,13 +168,13 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
                 break
             }
 
-            if element.Name.Local == "obj" {
-                obj, err := decodeCAkObjectStartElement(&element)
+            if element.Name.Local == "object" {
+                object, err := decodeCAkObjectStartElement(&element)
                 if err != nil {
                     return &cntr, err
                 }
 
-                if obj.Name != "Children" {
+                if object.Name != "Children" {
                     continue
                 }
 
@@ -209,13 +218,15 @@ func parseCAkRanSeqCntrObjectElement(decoder *xml.Decoder) (
 	}
 }
 
-// Parsing logic for when a StartElement <obj na="CAkSound"> is encounted.
-// It only extract some basic information (ULID, source ID, and direct parent ULID)
-//
-// [return]
-// *CAkSound - a pointer to a struct that encapsulates partial information about 
-// CAkSound. Nil only when the object ULID cannot be obtained.
-// error - trivial
+/*
+Parsing logic for when a StartElement <object na="CAkSound"> is encounted.
+It only extract some basic information (ULID, source ID, and direct parent ULID)
+
+[return]
+*CAkSound - a pointer to a struct that encapsulates partial information about 
+CAkSound. Nil only when the object ULID cannot be obtained.
+error - trivial
+*/
 func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
 	sound := CAkSound{ false, 0, 0, 0, make(map[uint32]Empty) }
 
@@ -237,21 +248,21 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
 
 		switch element := token.(type) {
 		case xml.StartElement:
-			if element.Name.Local != "fld" {
+			if element.Name.Local != "field" {
 				break
 			}
 
-            fld, err := decodeCAkFldStartElement(&element)
+            field, err := decodeCAkFldStartElement(&element)
             if err != nil {
                 return &sound, err
             }
 
-            if fld.Type != "tid" {
+            if field.Type != "tid" {
                 continue
             }
 
-            if fld.Name == "sourceID" {
-                v, err := strconv.ParseInt(fld.Value, 10, 32)
+            if field.Name == "sourceID" {
+                v, err := strconv.ParseInt(field.Value, 10, 32)
                 if err != nil {
                     return &sound, err
                 }
@@ -259,8 +270,8 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
                 break
            } 
 
-           if fld.Name == "DirectParentID" {
-               v, err := strconv.ParseInt(fld.Value, 10, 32)
+           if field.Name == "DirectParentID" {
+               v, err := strconv.ParseInt(field.Value, 10, 32)
                if err != nil {
                    return &sound, err
                }
@@ -271,17 +282,19 @@ func parseCAkSoundObjectElement(decoder *xml.Decoder) (*CAkSound, error) {
     }
 }
 
-// Parsing logic when a StartElement <obj na="HircChunk"> is encounted
-// 
-// [parameter]
-// decoder - a reference to StartElement.
-//
-// [return]
-// *CAkHirearchy - a pointer to a struct that encapsulates partial information 
-// about Wwise Hirearchy. Nil when an error is occured.
-// error - trivial
-func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
-	hirearchy := &CAkHirearchy{
+/*
+Parsing logic when a StartElement <object na="HircChunk"> is encounted
+
+[parameter]
+decoder - a reference to StartElement.
+
+[return]
+*CAkHierarchy - a pointer to a struct that encapsulates partial information 
+about Wwise Hierarchy. Nil when an error is occured.
+error - trivial
+*/
+func parseHircChunkXML(decoder *xml.Decoder) (*CAkHierarchy, error) {
+	hierarchy := &CAkHierarchy{
 		CAkObjects: make(map[uint32]CAkObject),
 		ReferencedSounds: make(map[uint32]*CAkSound),
 		Sounds: make(map[uint32]*CAkSound),
@@ -297,16 +310,16 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 
 		switch element := token.(type) {
 		case xml.StartElement:
-            if element.Name.Local != "obj" {
+            if element.Name.Local != "object" {
                 continue
             }
 
-            obj, err := decodeCAkObjectStartElement(&element)
+            object, err := decodeCAkObjectStartElement(&element)
             if err != nil {
                 return nil, err
             }
 
-            if obj.Name == "CAkSound" {
+            if object.Name == "CAkSound" {
 				sound, err := parseCAkSoundObjectElement(decoder)
 				if err != nil {
                     errMsg := "Failed to parse CAkSound object element."
@@ -316,13 +329,13 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 					return nil, errors.Join(errors.New(errMsg), err)
 				}
 
-				if _, in := hirearchy.Sounds[sound.ObjectULID]; in {
+				if _, in := hierarchy.Sounds[sound.ObjectULID]; in {
                     errMsg := fmt.Sprintf("Duplicated CAkSound object ULID: %d", 
                     sound.ObjectULID)
 					return nil, errors.New(errMsg)
 				}
 
-                v, err := strconv.ParseInt(obj.Index, 10, 32)
+                v, err := strconv.ParseInt(object.Index, 10, 32)
                 if err != nil {
                     errMsg := fmt.Sprintf("Failed to obtain index for CAkSound. " + 
                     "ObjectULID: %d.", sound.ObjectULID)
@@ -331,13 +344,13 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
                 }
 
                 sound.ObjectIndex = int32(v)
-				hirearchy.CAkObjects[sound.ObjectULID] = sound
-				hirearchy.Sounds[sound.ObjectULID] = sound
+				hierarchy.CAkObjects[sound.ObjectULID] = sound
+				hierarchy.Sounds[sound.ObjectULID] = sound
 
 				break
             }
 
-            if obj.Name == "CAkRanSeqCntr" {
+            if object.Name == "CAkRanSeqCntr" {
 				cntr, err := parseCAkRanSeqCntrObjectElement(decoder)
 				if err != nil {
                     errMsg := "Failed to parse CAkRanSeqCntr object element."
@@ -347,13 +360,13 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 					return nil, errors.Join(errors.New(errMsg), err)
 				}
 
-				if _, in := hirearchy.RanSeqCntrs[cntr.ObjectULID]; in {
+				if _, in := hierarchy.RanSeqCntrs[cntr.ObjectULID]; in {
                     errMsg := fmt.Sprintf("Duplicated CAkRanSeqCntr object ULID: %d", 
                     cntr.ObjectULID)
 					return nil, errors.New(errMsg)
 				}
 
-                v, err := strconv.ParseInt(obj.Index, 10, 32)
+                v, err := strconv.ParseInt(object.Index, 10, 32)
                 if err != nil {
                     errMsg := fmt.Sprintf("Failed to obtain index for CAkRanSeqCntr. " + 
                     "ObjectULID: %d.", cntr.ObjectULID)
@@ -361,8 +374,8 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
                 } 
 
                 cntr.ObjectIndex = int32(v)
-				hirearchy.CAkObjects[cntr.ObjectULID] = cntr
-				hirearchy.RanSeqCntrs[cntr.ObjectULID] = cntr
+				hierarchy.CAkObjects[cntr.ObjectULID] = cntr
+				hierarchy.RanSeqCntrs[cntr.ObjectULID] = cntr
 
 				break
             }
@@ -376,20 +389,20 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 	/**
 	 * Group all CAkSound object references into its parent CAkRanSeqCntr 
 	 * */
-	for cntrULID, cntr := range hirearchy.RanSeqCntrs {
+	for cntrULID, cntr := range hierarchy.RanSeqCntrs {
         if cntr == nil {
-                panic("Assertion failed. Nil Random / Sequence object when " +
-                "grouping Sound objects into Random / Sequence Containers")
+            panic("Assertion failed. Nil Random / Sequence object when " +
+            "grouping Sound objects into Random / Sequence Containers")
         }
 
 		for soundULID := range cntr.CAkSounds {
-			sound, in := hirearchy.Sounds[soundULID]
+			sound, in := hierarchy.Sounds[soundULID]
 			if !in {
-				if _, in := hirearchy.ReferencedSounds[soundULID]; in {
+				if _, in := hierarchy.ReferencedSounds[soundULID]; in {
 					return nil, errors.New("Duplicated referenced Sound " +
 					"object ULID")
 				}
-				hirearchy.ReferencedSounds[soundULID] = nil
+				hierarchy.ReferencedSounds[soundULID] = nil
                 continue
 			}
 
@@ -410,11 +423,11 @@ func parseHircChunkXML(decoder *xml.Decoder) (*CAkHirearchy, error) {
 		}
 	}
 
-	return hirearchy, nil
+	return hierarchy, nil
 }
 
 
-// Main entry point for parsing a single Wwiser XML file. CAkWwiseBank.Hirearchy
+// Main entry point for parsing a single Wwiser XML file. CAkWwiseBank.Hierarchy
 // can be nil if a Wwise Soundbank does not contain HirchChunk section.
 // 
 // [parameter]
@@ -442,7 +455,7 @@ func parseWwiseSoundBankXML(f io.Reader) (*CAkWwiseBank, error) {
 		switch element := t.(type) {
 		case xml.StartElement:
 			/** Validation check */
-            if element.Name.Local != "obj" {
+            if element.Name.Local != "object" {
                 continue
             }
 
@@ -457,7 +470,7 @@ func parseWwiseSoundBankXML(f io.Reader) (*CAkWwiseBank, error) {
             }
 
             if obj.Name == "HircChunk" {
-				bank.Hirearchy, err = parseHircChunkXML(decoder)
+				bank.Hierarchy, err = parseHircChunkXML(decoder)
 				if err != nil {
 					return nil, errors.Join(
                         errors.New("Failed to parsed HircChunk object element"), 
@@ -494,6 +507,7 @@ func parseWwiserXML(xmlsArg string) error {
 			continue
 		}
 
+        /*
         output, err := json.MarshalIndent(bank, "", "    ")
         if err != nil {
             DefaultLogger.Error("Failed to generate JSON Wwise soundbank",
@@ -502,15 +516,16 @@ func parseWwiserXML(xmlsArg string) error {
             )
             continue
         }
+        */
 
 		DefaultLogger.Info("Parsing Result", 
 			"mediaIndexCount", bank.MediaIndex.Count,
-			"referencedSounds", len(bank.Hirearchy.ReferencedSounds),
-			"soundObjectCount", len(bank.Hirearchy.Sounds),
-			"ranSeqCntrsCount", len(bank.Hirearchy.RanSeqCntrs),
+			"referencedSounds", len(bank.Hierarchy.ReferencedSounds),
+			"soundObjectCount", len(bank.Hierarchy.Sounds),
+			"ranSeqCntrsCount", len(bank.Hierarchy.RanSeqCntrs),
 		)
 
-        fmt.Println(string(output))
+        // fmt.Println(string(output))
 	}
 
 	return nil
