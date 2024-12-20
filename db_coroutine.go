@@ -14,7 +14,10 @@ import (
 // [channel passing]
 // *ExtractBankResult - Never nil
 //   - result - nil only when openToCFile error or extractWwiseSoundbanks error 
-func extractSoundbankTask(gameArchiveID string, c chan *BankExtractTaskResult) {
+func extractSoundbankTask(
+    gameArchiveID string,
+    rawData bool,
+    c chan *BankExtractTaskResult) {
 	payload := &BankExtractTaskResult{ gameArchiveID: gameArchiveID }
 	tocFile, err := openToCFile(gameArchiveID)
 	if err != nil {
@@ -24,7 +27,7 @@ func extractSoundbankTask(gameArchiveID string, c chan *BankExtractTaskResult) {
 	}
 	defer tocFile.Close()
 
-	payload.result, payload.err = extractWwiseSoundbanks(*tocFile, true)
+	payload.result, payload.err = extractWwiseSoundbanks(*tocFile, rawData)
 	c <- payload
 }
 
@@ -138,9 +141,14 @@ func exportParseWwiserXML(pathName string, bank *DBToCWwiseSoundbank) (
     if err != nil {
         return nil, err
     }
-    defer xmlFile.Close()
 
-    return parseWwiseSoundBankXML(xmlFile)
+    result, err := parseWwiseSoundBankXML(xmlFile)
+    if err != nil {
+        xmlFile.Close()
+        os.Rename(filename, pathName + ".error")
+    }
+    xmlFile.Close()
+    return result, err
 }
 
 // A go coroutine function (exporting and parsing Wwiser XML)
