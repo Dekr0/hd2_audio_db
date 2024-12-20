@@ -7,38 +7,38 @@ import (
 
 const (
 	TYPE_CAKMediaIndex = 0x0
-	TYPE_CAKHirearchy = 0x1
+	TYPE_CAKHierarchy = 0x1
 	TYPE_CAKSOUND = 0x10
 	TYPE_CAKRANSEQCNTR = 0x11
 )
 
-var HIREARCHY_TYPE_NAME []string = []string{
+var HIERARCHY_TYPE_NAME []string = []string{
     "Sound",
     "Random / Sequence Container",
 }
 
-type CAkObjElement struct {
-    XMLName xml.Name `xml:"obj" json:"XMLName"`
-    Name string `xml:"na,attr" json:"Name"`
-    Index string `xml:"ix,attr" json:"Index"`
+type CAkObjectElement struct {
+    XMLName xml.Name `xml:"object" json:"XMLName"`
+    Name string `xml:"name,attr" json:"Name"`
+    Index string `xml:"index,attr" json:"Index"`
 }
 
-type CAkFldElement struct {
-	XMLName xml.Name `xml:"fld" json:"XMLName"`
-	Name string `xml:"na,attr" json:"Name"`
-	Type string `xml:"ty,attr" json:"Type"`
-	Value string `xml:"va,attr" json:"Value"`
-    ValueF string `xml:"vf,attr" json:"ValueF"`
+type CAkFieldElement struct {
+	XMLName xml.Name `xml:"field" json:"XMLName"`
+	Name string `xml:"name,attr" json:"Name"`
+	Type string `xml:"type,attr" json:"Type"`
+	Value string `xml:"value,attr" json:"Value"`
+    ValueF string `xml:"valuefmt,attr" json:"ValueF"`
 }
 
 type CAkChildrenElement struct {
-	XMLName xml.Name `xml:"obj" json:"XMLName"`
-	Nodes []*CAkFldElement `xml:"fld" json:"Nodes"`
+	XMLName xml.Name `xml:"object" json:"XMLName"`
+	Nodes []*CAkFieldElement `xml:"field" json:"Nodes"`
 }
 
 type CAkWwiseBank struct {
 	MediaIndex *CAkMediaIndex `json:"MediaIndex"`
-	Hirearchy *CAkHirearchy `json:"Hirearchy"`
+	Hierarchy *CAkHierarchy `json:"Hierarchy"`
 }
 
 type CAkMediaIndex struct {
@@ -62,7 +62,7 @@ type CAkObject interface {
  * Sounds                CAKSOUND_SIZE * SoundsCount
  * RanSeqCntrsCount      uint16
  */
-type CAkHirearchy struct {
+type CAkHierarchy struct {
 	CAkObjects map[uint32]CAkObject `json:"CAkObj"`
 	ReferencedSounds map[uint32]*CAkSound `json:"CrossSharedSounds"` // Potentially contain nil Sound object
 	Sounds map[uint32]*CAkSound `json:"Sounds"`
@@ -70,7 +70,7 @@ type CAkHirearchy struct {
 }
 
 // Unused
-func (h *CAkHirearchy) Marshal() []byte {
+func (h *CAkHierarchy) Marshal() []byte {
 	size := 
 		4 +
 		4 +
@@ -139,7 +139,7 @@ func (r *CAkRanSeqCntr) getObjectULID() uint32 {
 }
 
 func (r *CAkRanSeqCntr) getType() string {
-    return HIREARCHY_TYPE_NAME[1]
+    return HIERARCHY_TYPE_NAME[1]
 }
 
 func (r *CAkRanSeqCntr) Marshal() []byte {
@@ -193,7 +193,7 @@ func (s *CAkSound) getObjectULID() uint32 {
 }
 
 func (s *CAkSound) getType() string {
-    return HIREARCHY_TYPE_NAME[0]
+    return HIERARCHY_TYPE_NAME[0]
 }
 
 // Unused
