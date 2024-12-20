@@ -161,7 +161,7 @@ func (w *ToCWwiseSoundbank) exportWwiserXML(removeBinaryFile bool) error {
 		)
 	}
 	
-	cmd := exec.Command("python", "wwiser.pyz", filename)
+	cmd := exec.Command("python", "wwiser.pyz", "-d", "xml", filename)
 	if err = cmd.Run(); err != nil {
 		return errors.Join(
 			errors.New("Failed to generate Wwiser XML output"), 
