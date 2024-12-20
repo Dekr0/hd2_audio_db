@@ -2,6 +2,10 @@ package main
 
 var CSV_DIR string
 
+type LabelFile struct {
+    Sources map[string]string `json:"sources"`
+}
+
 type DBToCWwiseSoundbank struct {
     dbid string
     ref *ToCWwiseSoundbank
@@ -14,15 +18,27 @@ type DBCAkObject struct {
     linkedSoundbankPathNames map[string]Empty
 }
 
-type HireachyResult struct {
+type BankExtractTaskResult struct {
+    gameArchiveID string
+    result map[uint64]*ToCWwiseSoundbank
+    err error
+}
+
+type GameArchiveCSVTaskResult struct {
+    filename string
+    result *GameArchiveCSVResult
+    err error
+}
+
+type HierarchyResult struct {
     uniqueObjs map[uint32]*DBCAkObject
     uniqueSounds map[uint32]*CAkSound
     uniqueCntrs map[uint32]*CAkRanSeqCntr
 }
 
-type BankExtractTaskResult struct {
-    gameArchiveID string
-    result map[uint64]*ToCWwiseSoundbank
+type WwiserXMLTaskResult struct {
+    pathName string
+    result *CAkWwiseBank
     err error
 }
 
@@ -48,16 +64,4 @@ type GameArchiveCSVResult struct {
 
 func newGameArchiveCSVResult() *GameArchiveCSVResult {
     return &GameArchiveCSVResult{ make(map[string]*GameArchive), 0, 0 }
-}
-
-type GameArchiveCSVTaskResult struct {
-    filename string
-    result *GameArchiveCSVResult
-    err error
-}
-
-type WwiserXMLTaskResult struct {
-    pathName string
-    result *CAkWwiseBank
-    err error
 }
