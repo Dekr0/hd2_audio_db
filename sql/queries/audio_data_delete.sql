@@ -4,11 +4,11 @@ DELETE FROM game_archive;
 -- name: DeleteAllSoundbank :exec
 DELETE FROM soundbank;
 
--- name: DeleteAllHirearchyObjectType :exec
-DELETE FROM hirearchy_object_type;
+-- name: DeleteAllHierarchyObjectType :exec
+DELETE FROM hierarchy_object_type;
 
--- name: DeleteAllHirearchyObject :exec
-DELETE FROM hirearchy_object;
+-- name: DeleteAllHierarchyObject :exec
+DELETE FROM hierarchy_object;
 
 -- name: DeleteAllWwiseStream :exec
 DELETE FROM wwise_stream;

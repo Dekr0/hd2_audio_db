@@ -1,6 +1,6 @@
 -- name: GetAllGameArchives :many
 SELECT * FROM game_archive;
 
--- name: GetAllHirearchyObjectTypes :many
-SELECT * FROM hirearchy_object_type;
+-- name: GetAllHierarchyObjectTypes :many
+SELECT * FROM hierarchy_object_type;
 
