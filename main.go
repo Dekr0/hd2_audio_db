@@ -17,20 +17,37 @@ func run() error {
 	"Absolute path to Helldivers 2 data directory")
 
 	archiveTableFlag := flag.Bool("table-archive", false, 
-	"Completely rewrite basic information of all game archives into the DB" + 
-	" (Destructive)")
+	"Completely rewrite basic information of all game archives (based on spreadsheets) into the DB" + 
+	" (Destructive). Used by DB maintainers")
 
-	bankTableFlag := flag.Bool("table-bank", false,
+    allArchiveTableFlag := flag.Bool("table-archive-all", false,
+    "Completely rewrite basic information of all game archives (not based on " +
+    "spreadsheets, based on content in the Helldivers 2 data directory) into the" +
+    " DB (Destructive). Used by DB maintainers")
+
+    bankTableFlag := flag.Bool("table-bank", false,
+    "Completely rewrite basic information about Wwise Soundbank into the DB" +
+    "(Destructive). Used by DB maintainers.")
+
+	soundAssetsTableFlag := flag.Bool("table-sound-asset", false,
 	"Completely rewrite information about Wwise Soundbank and its hierarchy " +
-	" objects used in game into the DB (Destructive)")
+	" objects used in game into the DB (Destructive). Used by DB maintainers.")
 
 	streamTableFlag := flag.Bool("table-stream", false, 
 	"Completely rewrite information about all Wwise streams used in game into" +
-	" the DB (Destructive)")
+	" the DB (Destructive). Used by DB maintainers.")
 
 	extractBankFlag := flag.String("extract-bank", "", 
 	"Extract basic information of Wwise Soundbanks in (a) game archive(s), Wwise " +
 	"Soundbank binary content, and its Wwiser XML output")
+
+    labelNoStructFlag := flag.String("table-label", "",
+    "Import labels for audio source into the database (Overwrite the existing" +
+    "one). Accept a list of `.json` file path separated by `;`")
+
+    labelNoStructFolderFlag := flag.String("table-label-folder", "",
+    "Import labels for audio source into the database (Overwrite the existing" +
+    "one). Accept a folder path that contains a collection of `.json` file")
 
 	xmlFlag := flag.String("xmls", "", "")
 
@@ -50,18 +67,29 @@ func run() error {
 	ctx := context.Background()
 
 	if *archiveTableFlag {
-        if err := rewriteAllHirearchyObjectTypes(ctx); err != nil {
+        if err := rewriteAllHierarchyObjectTypes(ctx); err != nil {
             return err
         }
-		return rewriteAllGameArchives("./csv/archives", ctx)
+		return rewriteAllGameArchivesSpreadsheet("./csv/archives", ctx)
 	}
 
-	if *bankTableFlag {
+    if *allArchiveTableFlag {
+        if err := rewriteAllHierarchyObjectTypes(ctx); err != nil {
+            return err
+        }
+        return rewriteAllGameArchives(ctx)
+    }
+    
+    if *bankTableFlag {
+        return rewriteAllSoundBank(ctx)
+    }
+
+	if *soundAssetsTableFlag {
 		return rewriteAllSoundAssets(ctx)
 	}
 
 	if *streamTableFlag {
-		return rewriteAllWwiseStreams(ctx)
+        return nil
 	}
 
 	if *extractBankFlag != "" {
@@ -72,6 +100,14 @@ func run() error {
 	if *xmlFlag != "" {
 		return parseWwiserXML(*xmlFlag)
 	}
+
+    if *labelNoStructFlag != "" {
+        return updateSoundLabelsFromFileNoStruct(*labelNoStructFlag, ctx)
+    }
+
+    if *labelNoStructFolderFlag != "" {
+        return updateSoundLabelsFromFolderNoStruct(*labelNoStructFolderFlag, ctx)
+    }
 
 	flag.Usage()
 
