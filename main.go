@@ -4,37 +4,40 @@ import (
 	"context"
 	"flag"
 	"os"
-)
 
-type Empty struct {}
+    "dekr0/hd2_audio_db/db"
+    "dekr0/hd2_audio_db/log"
+    "dekr0/hd2_audio_db/toc"
+    "dekr0/hd2_audio_db/wwise"
+)
 
 func run() error {
 	if len(os.Args) > 3 {
-		DefaultLogger.Error("Only one option can run at the same time")
+		log.DefaultLogger.Error("Only one option can run at the same time")
 	}
 
 	dataPathFlag := flag.String("data", "", 
 	"Absolute path to Helldivers 2 data directory")
 
 	archiveTableFlag := flag.Bool("table-archive", false, 
-	"Completely rewrite basic information of all game archives (based on spreadsheets) into the DB" + 
+	"Completely db.Rewrite basic information of all game archives (based on spreadsheets) into the DB" + 
 	" (Destructive). Used by DB maintainers")
 
     allArchiveTableFlag := flag.Bool("table-archive-all", false,
-    "Completely rewrite basic information of all game archives (not based on " +
+    "Completely db.Rewrite basic information of all game archives (not based on " +
     "spreadsheets, based on content in the Helldivers 2 data directory) into the" +
     " DB (Destructive). Used by DB maintainers")
 
     bankTableFlag := flag.Bool("table-bank", false,
-    "Completely rewrite basic information about Wwise Soundbank into the DB" +
+    "Completely db.Rewrite basic information about Wwise Soundbank into the DB" +
     "(Destructive). Used by DB maintainers.")
 
 	soundAssetsTableFlag := flag.Bool("table-sound-asset", false,
-	"Completely rewrite information about Wwise Soundbank and its hierarchy " +
+	"Completely db.Rewrite information about Wwise Soundbank and its hierarchy " +
 	" objects used in game into the DB (Destructive). Used by DB maintainers.")
 
 	streamTableFlag := flag.Bool("table-stream", false, 
-	"Completely rewrite information about all Wwise streams used in game into" +
+	"Completely db.Rewrite information about all Wwise streams used in game into" +
 	" the DB (Destructive). Used by DB maintainers.")
 
 	extractBankFlag := flag.String("extract-bank", "", 
@@ -52,14 +55,14 @@ func run() error {
 	xmlFlag := flag.String("xmls", "", "")
 
     if *dataPathFlag != "" {
-        DATA = *dataPathFlag
+        toc.DATA = *dataPathFlag
     } else {
-        DATA = os.Getenv("HELLDIVER2_DATA")
+        toc.DATA = os.Getenv("HELLDIVER2_DATA")
     }
 
-    CSV_DIR = os.Getenv("CSV_DIR")
-    if CSV_DIR == "" {
-        CSV_DIR = "./csv/archives/"
+    db.CSV_DIR = os.Getenv("CSV_DIR")
+    if db.CSV_DIR == "" {
+        db.CSV_DIR = "./csv/archives/"
     }
 
 	flag.Parse()
@@ -67,25 +70,25 @@ func run() error {
 	ctx := context.Background()
 
 	if *archiveTableFlag {
-        if err := rewriteAllHierarchyObjectTypes(ctx); err != nil {
+        if err := db.RewriteAllHierarchyObjectTypes(ctx); err != nil {
             return err
         }
-		return rewriteAllGameArchivesSpreadsheet("./csv/archives", ctx)
+		return db.RewriteAllGameArchivesSpreadsheet("./csv/archives", ctx)
 	}
 
     if *allArchiveTableFlag {
-        if err := rewriteAllHierarchyObjectTypes(ctx); err != nil {
+        if err := db.RewriteAllHierarchyObjectTypes(ctx); err != nil {
             return err
         }
-        return rewriteAllGameArchives(ctx)
+        return db.RewriteAllGameArchives(ctx)
     }
     
     if *bankTableFlag {
-        return rewriteAllSoundBank(ctx)
+        return db.RewriteAllSoundBank(ctx)
     }
 
 	if *soundAssetsTableFlag {
-		return rewriteAllSoundAssets(ctx)
+		return db.RewriteAllSoundAssets(ctx)
 	}
 
 	if *streamTableFlag {
@@ -93,20 +96,20 @@ func run() error {
 	}
 
 	if *extractBankFlag != "" {
-		extractBank(*extractBankFlag)
+		toc.ExtractBank(*extractBankFlag)
 		return nil
 	}
 
 	if *xmlFlag != "" {
-		return parseWwiserXML(*xmlFlag)
+		return wwise.ParseWwiserXML(*xmlFlag)
 	}
 
     if *labelNoStructFlag != "" {
-        return updateSoundLabelsFromFileNoStruct(*labelNoStructFlag, ctx)
+        return db.UpdateSoundLabelsFromFileNoStruct(*labelNoStructFlag, ctx)
     }
 
     if *labelNoStructFolderFlag != "" {
-        return updateSoundLabelsFromFolderNoStruct(*labelNoStructFolderFlag, ctx)
+        return db.UpdateSoundLabelsFromFolderNoStruct(*labelNoStructFolderFlag, ctx)
     }
 
 	flag.Usage()
@@ -116,7 +119,7 @@ func run() error {
 
 func main() {
 	if err := run(); err != nil {
-		DefaultLogger.Error("Error", "error_detail", err)
+		log.DefaultLogger.Error("Error", "error_detail", err)
 		os.Exit(1)
 	}
 	os.Exit(0)
