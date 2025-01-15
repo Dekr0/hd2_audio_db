@@ -1,4 +1,5 @@
 {
+    "version": 1,
     "sources": {
         "sentry_gatling_transient_loop_01": "415062923",
         "sentry_gatling_transient_loop_02": "155041360",
