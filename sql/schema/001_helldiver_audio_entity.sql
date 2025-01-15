@@ -9,10 +9,17 @@ CREATE TABLE game_archive (
 CREATE TABLE soundbank (
     db_id TEXT PRIMARY KEY,
     toc_file_id TEXT NOT NULL UNIQUE,
-    soundbank_path_name TEXT NOT NULL,
+    soundbank_path_name TEXT NOT NULL UNIQUE,
     soundbank_readable_name TEXT NOT NULL,
-    categories TEXT NOT NULL,
-    linked_game_archive_ids TEXT NOT NULL
+    categories TEXT NOT NULL
+);
+
+CREATE TABLE game_archive_soundbank_relation (
+    game_archive_db_id TEXT NOT NULL,
+    soundbank_db_id TEXT NOT NULL,
+    PRIMARY KEY (game_archive_db_id, soundbank_db_id),
+    FOREIGN KEY (game_archive_db_id) REFERENCES game_archive(db_id),
+    FOREIGN KEY (soundbank_db_id) REFERENCES soundbank(db_id)
 );
 
 CREATE TABLE hierarchy_object_type (
@@ -25,14 +32,22 @@ CREATE TABLE hierarchy_object (
     wwise_object_id TEXT NOT NULL UNIQUE,
     type_db_id TEXT NOT NULL,
     parent_wwise_object_id TEXT NOT NULL,
-    linked_soundbank_path_names TEXT NOT NULL,
     FOREIGN KEY (type_db_id) REFERENCES hierarchy_object_type(db_id)
+);
+
+CREATE TABLE soundbank_hierarchy_object_relation (
+    soundbank_db_id TEXT NOT NULL,
+    hierarchy_object_db_id TEXT NOT NULL,
+    PRIMARY KEY (hierarchy_object_db_id, soundbank_db_id),
+    FOREIGN KEY (hierarchy_object_db_id) REFERENCES hierarchy_object(db_id),
+    FOREIGN KEY (soundbank_db_id) REFERENCES soundbank(db_id)
 );
 
 CREATE TABLE random_seq_container (
     db_id TEXT PRIMARY KEY,
     label TEXT NOT NULL,
     tags TEXT NOT NULL,
+    description TEXT NOT NULL,
     FOREIGN KEY (db_id) REFERENCES hierarchy_object(db_id)
 );
 
@@ -41,6 +56,7 @@ CREATE TABLE sound (
     wwise_short_id TEXT NOT NULL,
     label TEXT NOT NULL,
     tags TEXT NOT NULL,
+    description TEXT NOT NULL,
     PRIMARY KEY (db_id, wwise_short_id),
     FOREIGN KEY (db_id) REFERENCES hierarchy_object(db_id)
 );
@@ -57,7 +73,9 @@ CREATE TABLE wwise_stream (
 DROP TABLE wwise_stream;
 DROP TABLE sound;
 DROP TABLE random_seq_container;
-DROP TABLE soundbank;
+DROP TABLE soundbank_hierarchy_object_relation;
 DROP TABLE hierarchy_object;
 DROP TABLE hierarchy_object_type;
+DROP TABLE game_archive_soundbank_relation;
+DROP TABLE soundbank;
 DROP TABLE game_archive;
