@@ -32,6 +32,9 @@ CREATE TABLE hierarchy_object (
     wwise_object_id TEXT NOT NULL UNIQUE,
     type_db_id TEXT NOT NULL,
     parent_wwise_object_id TEXT NOT NULL,
+    label TEXT NOT NULL,
+    tags TEXT NOT NULL,
+    description NOT NULL,
     FOREIGN KEY (type_db_id) REFERENCES hierarchy_object_type(db_id)
 );
 
@@ -43,20 +46,9 @@ CREATE TABLE soundbank_hierarchy_object_relation (
     FOREIGN KEY (soundbank_db_id) REFERENCES soundbank(db_id)
 );
 
-CREATE TABLE random_seq_container (
-    db_id TEXT PRIMARY KEY,
-    label TEXT NOT NULL,
-    tags TEXT NOT NULL,
-    description TEXT NOT NULL,
-    FOREIGN KEY (db_id) REFERENCES hierarchy_object(db_id)
-);
-
 CREATE TABLE sound (
     db_id TEXT NOT NULL,
     wwise_short_id TEXT NOT NULL,
-    label TEXT NOT NULL,
-    tags TEXT NOT NULL,
-    description TEXT NOT NULL,
     PRIMARY KEY (db_id, wwise_short_id),
     FOREIGN KEY (db_id) REFERENCES hierarchy_object(db_id)
 );
