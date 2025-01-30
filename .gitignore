@@ -12,3 +12,4 @@
 **/wwiser.log
 **/*.xml
 **/*.bnk
+**/*.error
