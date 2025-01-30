@@ -6,7 +6,13 @@ $Env:GOOSE_MIGRATION_DIR="sql/schema"
 $Env:GOOSE_DRIVER="sqlite3"
 $dev = $true
 
-function ExtractBankDev {
+function Setup() {
+    go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+    go install github.com/pressly/goose/v3/cmd/goose@latest
+    go get .
+}
+
+function ExtractBank {
     param (
         $ArchiveId
     )
@@ -15,7 +21,7 @@ function ExtractBankDev {
     }
 }
 
-function ParseBankXMLDev {
+function ParseBankXML {
     param (
         $xml
     )
@@ -42,41 +48,21 @@ function CleanAll {
     CleanError
 }
 
-function RewriteTableArchiveSpreadSheet {
-    rm log.txt
-    if ($dev) {
-        go run . -table-archive >> log.txt
+function GenDatabase {
+    if (Test-Path -Path database) {
+        rm database
+        goose up
     }
-}
-
-function RewriteTableArchiveAll {
-    rm log.txt
-    if ($dev) {
-        go run . -table-archive-all >> log.txt
+    if (Test-Path -Path log.txt) {
+        rm log.txt
     }
-}
-
-function RewriteTableBankAll {
-    rm log.txt
-    if ($dev) {
-        go run . -table-bank >> log.txt
-    }
-}
-
-function RewriteTableSoundAssets {
-    rm log.txt
-    if ($dev) {
-        go run . -table-sound-asset >> log.txt
-    }
-    CleanXML
-}
-
-function RewriteEverything {
     if ($dev) {
         go run . -table-archive-all >> log.txt
         go run . -table-bank >> log.txt
-        go run . -table-sound-asset >> log.txt
+        go run . -table-hierarchy-object >> log.txt
     }
+    CleanAll
+    CreateView
 }
 
 function CreateView {

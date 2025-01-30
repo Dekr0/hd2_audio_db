@@ -7,6 +7,37 @@ standardize label for different audio assets. It's under going continuous update
 - This repo contains a list of human-readable labeling for different audio 
 assets in Helldiver 2. It's under going continuous update.
 
+## Usage
+
+### Development Setup
+
+- This procedure should only run once.
+
+#### Windows
+
+- Open `./configure.ps1` with an editor, and assign the following
+    - `$ENV:HELLDIVER2_DATA` with absolute path Helldivers 2 game data folder
+    - `$ENV:GOBIN` with absolute path of Go bin folders (It contains all 
+    executable programs installed using `go install`.)
+        - Usually it's something like `C:/Users/YourUserName/go/bin`
+- Execute `. ./configure.ps1` in the terminal to source all commands used in 
+this go project.
+- Execute `Setup` in the terminal to install all the necessary go dependencies 
+for this go project.
+
+### Database Generation 
+
+#### Windows
+
+- Make sure to execute `. ./configure.ps1` in the terminal first.
+- Execute `GenDatabase` in the terminal to generate a brand new database.
+- If there's any error happen at any point of the generation, please check 
+`log.txt`.
+
+### Other Utility Tools
+
+- Work in Progress, or take a look of the source code and shell script.
+
 ## About Labeling
 
 - If you want to know what audio sources that are completely independent on 
@@ -39,27 +70,4 @@ perform complex querying in the database, you can download
 
 ### Understanding the Database schema
 
-- `game_archive` table contain all records of all existence Helldivers 2 game 
-archive in the game data folder.
-- `soundbank` table contain all records of all Wwise Soundbanks in all Helldivers
- 2 game archives. Here are something you need to keep in mind:
-    - A single game archive can contain one or more than one Wwise Soundbanks. 
-    - A Wwise Soundbank can appear only in one game archive, or in multiple game 
-    archives. For example, HMG.
-- `hirearchy_object` table contain all hierarchy objects of all Wwise Soundbanks 
-in all Helldivers 2 game archives.
-- `sound` table contain all sound objects of all Wwise Soundbanks in all 
-Helldivers 2 game archives. Here's something you need to keep in mind:
-    - There are two different types of ID. One is `wwise_short_id`. This type of 
-    ID is the ID you will see in the UI of audio modding tool. Another one is 
-    `wwise_object_id`. This type of ID is not visible in the UI of audio modding 
-    tool. They're only visible when you explore Wwiser XML file of a Soundbank. 
-    `wwise_short_id` is a one of the properties inside of a Sound object.
-    - Two sound objects with the same `wwise_object_id` does not mean they will 
-    have the `wwise_short_id`. `wwise_object_id` seems to be a type of ID that 
-    keep track of an object in the hierarchy level. In contrast, 
-    `wwise_short_id` is a type of ID that more focus on keeping track of a raw 
-    audio source, since sound object is a container for a raw audio source.
-    - Despite a sound object is in a given hierarchy of a Soundbank, this doesn't 
-    means it will in the media header section of that Soundbank. And, it most 
-    likely won't show up in the audio modding tool's UI.
+- Rework In Progress
