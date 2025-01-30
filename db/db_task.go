@@ -1,14 +1,10 @@
 package db
 
 import (
-	"context"
 	"database/sql"
-	"encoding/json"
 	"errors"
-	"path"
 
 	"os"
-	"strings"
 
 	"dekr0/hd2_audio_db/internal/database"
 
@@ -17,8 +13,6 @@ import (
 
 	_ "github.com/ncruces/go-sqlite3/driver"
 	_ "github.com/ncruces/go-sqlite3/embed"
-
-	"dekr0/hd2_audio_db/log"
 )
 
 /*
@@ -76,140 +70,3 @@ func getDBConn() (*sql.DB, error) {
     return db, err
 }
 
-/*
- Read the data from all files supported by 
-*/
-func UpdateSoundLabelsFromFileNoStruct(
-    pathArgs string, ctx context.Context,
-) error {
-    paths := strings.Split(pathArgs, ";")
-
-    db, err := getDBConn()
-    if err != nil {
-        return err
-    }
-    defer db.Close()
-
-    dbQueries := database.New(db)
-
-    tx, err := db.BeginTx(ctx, nil)
-    if err != nil {
-        return err
-    }
-
-    queryWithTx := dbQueries.WithTx(tx)
-
-    for _, p := range paths {
-        var data LabelFile
-
-        buf, err := os.ReadFile(p)
-        if err != nil {
-            log.DefaultLogger.Warn("Error opening file", "file_path", p, "error", err)
-            continue
-        }
-
-        err = json.Unmarshal(buf, &data)
-        if err != nil {
-            log.DefaultLogger.Warn("Error parsing file", "file_path", p, "error", err)
-            continue
-        }
-
-        for label, sourceId := range data.Sources {
-            err := queryWithTx.UpdateSoundLabelBySourceId(
-                ctx,
-                database.UpdateSoundLabelBySourceIdParams{
-                    Label: label,
-                    WwiseShortID: sourceId,
-                },
-            )
-            if err != nil {
-                tx.Rollback()
-                return err
-            }
-        }
-    }
-
-    err = tx.Commit()
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
-
-    return nil
-}
-
-func UpdateSoundLabelsFromFolderNoStruct(
-    pathArg string, ctx context.Context,
-) error {
-    jsonFiles, err := os.ReadDir(pathArg)
-    if err != nil {
-        return err
-    }
-
-    db, err := getDBConn()
-    if err != nil {
-        return err
-    }
-    defer db.Close()
-
-    dbQueries := database.New(db)
-
-    tx, err := db.BeginTx(ctx, nil)
-    if err != nil {
-        return err
-    }
-
-    queryWithTx := dbQueries.WithTx(tx)
-
-    for _, f := range jsonFiles {
-        var data LabelFile
-
-        if !strings.HasSuffix(f.Name(), ".json") {
-            continue
-        }
-
-        filename := path.Join(pathArg, f.Name())
-
-        buf, err := os.ReadFile(filename)
-        if err != nil {
-            log.DefaultLogger.Warn(
-                "Error opening file", 
-                "file_path", filename, 
-                "error", err,
-            )
-            continue
-        }
-
-        err = json.Unmarshal(buf, &data)
-        if err != nil {
-            log.DefaultLogger.Warn(
-                "Error parsing file", 
-                "file_path", filename, 
-                "error", err,
-            )
-            continue
-        }
-
-        for label, sourceId := range data.Sources {
-            err := queryWithTx.UpdateSoundLabelBySourceId(
-                ctx,
-                database.UpdateSoundLabelBySourceIdParams{
-                    Label: label,
-                    WwiseShortID: sourceId,
-                },
-            )
-            if err != nil {
-                tx.Rollback()
-                return err
-            }
-        }
-    }
-
-    err = tx.Commit()
-    if err != nil {
-        tx.Rollback()
-        return err
-    }
-
-    return nil
-}
