@@ -21,6 +21,3 @@ DELETE FROM wwise_stream;
 
 -- name: DeleteAllSound :exec
 DELETE FROM sound;
-
--- name: DeleteAllRandomSeqContainer :exec
-DELETE FROM random_seq_container;

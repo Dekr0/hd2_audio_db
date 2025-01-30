@@ -28,9 +28,9 @@ INSERT INTO hierarchy_object_type (
 
 -- name: CreateHierarchyObject :exec
 INSERT INTO hierarchy_object (
-    db_id, wwise_object_id, type_db_id, parent_wwise_object_id
+    db_id, wwise_object_id, type_db_id, parent_wwise_object_id, label, tags, description
 ) VALUES (
-    ?, ?, ?, ?
+    ?, ?, ?, ?, ?, ?, ?
 );
 
 -- name: CreateSoundbankHierarchyObjectRelation :exec
@@ -40,23 +40,9 @@ INSERT INTO soundbank_hierarchy_object_relation (
     ?, ?
 );
 
--- name: CreateRandomSeqContainer :exec
-INSERT INTO random_seq_container (
-    db_id, label, tags, description
-) VALUES (
-    ?, ?, ?, ?
-);
-
 -- name: CreateSound :exec
 INSERT INTO sound (
-    db_id, wwise_short_id, label, tags, description
+    db_id, wwise_short_id
 ) VALUES (
-    ?, ?, ?, ?, ?
-);
-
--- name: CreateWwiseStream :exec
-INSERT INTO wwise_stream (
-    db_id, toc_file_id, label, tags, linked_game_archive_ids
-) VALUES (
-    ?, ?, ?, ?, ?
+    ?, ?
 );
