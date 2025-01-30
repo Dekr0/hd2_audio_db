@@ -110,12 +110,14 @@ func parseGameArchiveCSV(filename string) (*GameArchiveCSVResult, error) {
     }
 }
 
-// A go coroutine function (Parsing game archive spreadsheet)
-//
-// [channel passing]
-// - *GameArchiveCSVTaskResult - Never nil
-//   - GameArchiveCSVResult - Nil when an error occur when parseGameArchiveCSV 
-//   errors
+/*
+A go coroutine function (Parsing game archive spreadsheet)
+
+[channel passing]
+- *GameArchiveCSVTaskResult - Never nil
+  - GameArchiveCSVResult - Nil when an error occur when parseGameArchiveCSV 
+  errors
+*/
 func parseGameArchiveCSVTask(
     filename string, c chan *GameArchiveCSVTaskResult) {
     payload := &GameArchiveCSVTaskResult{}
@@ -125,11 +127,12 @@ func parseGameArchiveCSVTask(
     payload.result, payload.err = parseGameArchiveCSV(filename)
 }
 
-// [return]
-// *CAkWwiseBank - Nil when an error occurs
-// error - trivial
-func exportParseWwiserXML(pathName string, bank *DBToCWwiseSoundbank) (
-    *wwise.CAkWwiseBank, error) {
+/* 
+[return]
+- *CAkWwiseBank - Nil when an error occurs
+  - error - trivial
+*/
+func exportParseWwiserXML(pathName string, bank *DBToCWwiseSoundbank) ( *wwise.CAkWwiseBank, error) {
     if bank == nil {
         panic("Assertion failure. Receive a Nil DB wrapper of ToC encasuplated " +
         "Wwise Soundbank before exporting Wwiser XML")
@@ -140,14 +143,13 @@ func exportParseWwiserXML(pathName string, bank *DBToCWwiseSoundbank) (
         " before exporting Wwiser XML")
     }
 
-    err := bank.ref.ExportWwiserXML(true)
+    err := bank.ref.ExportWwiserXML(false)
     if err != nil {
         return nil, err
     }
     bank.ref.DeleteRawData()
 
-    filename := pathName + ".xml"
-    // filename = path.Join("xmls", filename)
+    filename := pathName + ".bnk" + ".xml"
     xmlFile, err := os.Open(filename)
     if err != nil {
         return nil, err
@@ -162,11 +164,13 @@ func exportParseWwiserXML(pathName string, bank *DBToCWwiseSoundbank) (
     return result, err
 }
 
-// A go coroutine function (exporting and parsing Wwiser XML)
-//
-// [channel passing]
-// *WwiserXMLTaskResult - Never nil
-//   result - Nil when exportParserWwiserXML errors
+/* 
+A go coroutine function (exporting and parsing Wwiser XML)
+
+[channel passing]
+- WwiserXMLTaskResult - Never nil
+    - result - Nil when exportParserWwiserXML errors
+*/
 func exportParseWwiserXMLTask(
     pathName string, bank *DBToCWwiseSoundbank, c chan *WwiserXMLTaskResult,
 ) {
