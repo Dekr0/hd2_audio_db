@@ -116,7 +116,7 @@ func (w *ToCWwiseSoundbank) ExportWwiserXML(removeBinaryFile bool) error {
 	if w.PathName == "" {
 		filename = fmt.Sprintf("%d", w.ToCFileId)
 	} else {
-		filename = w.PathName
+		filename = w.PathName + ".bnk"
 	}
     // filename = path.Join("xmls", filename)
 
