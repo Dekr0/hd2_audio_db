@@ -97,9 +97,6 @@ func writeAllHierarchyObjs(
     defer tx.Rollback()
 
     queriesWithTx := dbQueries.WithTx(tx)
-    if err = queriesWithTx.DeleteAllRandomSeqContainer(ctx); err != nil {
-        return err
-    }
     if err = queriesWithTx.DeleteAllSound(ctx); err != nil {
         return err
     }
@@ -139,6 +136,9 @@ func writeAllHierarchyObjs(
                 WwiseObjectID: strconv.Itoa(int(ulid)),
                 TypeDbID: typeID,
                 ParentWwiseObjectID: strconv.Itoa(parentULID),
+                Label: "",
+                Tags: "",
+                Description: "",
             },
         ); err != nil {
             return err
@@ -175,35 +175,12 @@ func writeAllHierarchyObjs(
                     database.CreateSoundParams{
                         DbID: obj.dbid,
                         WwiseShortID: strconv.Itoa(int(shortID)),
-                        Label: "",
-                        Tags: "",
-                        Description: "",
                     },
                 ); err != nil {
                     return err
                 }
+                totalSoundRow++
             }
-            totalSoundRow++
-        case wwise.HIERARCHY_TYPE_NAME[1]: // Random / Sequence Container
-            _, in := hierarchy.uniqueCntrs[ulid]
-            if !in { // invariant check
-                errMsg := "A random / sequence container object is not in " +
-                "the hierarchy object struct"
-                errMsg = fmt.Sprintf(" ULID: %d", ulid)
-                return errors.New(errMsg)
-            }
-            if err = queriesWithTx.CreateRandomSeqContainer(
-                ctx,
-                database.CreateRandomSeqContainerParams{
-                    DbID: obj.dbid,
-                    Label: "",
-                    Tags: "",
-                    Description: "",
-                },
-            ); err != nil {
-                return err
-            }
-            totalRandomSeqCntrRow++
         }
     }
 
