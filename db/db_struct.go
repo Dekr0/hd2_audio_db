@@ -7,8 +7,31 @@ import (
 
 var CSV_DIR string
 
-type LabelFile struct {
+type LabelFileVersion struct {
+    Version uint8 `json:"version"`
+}
+
+type LabelFileVersion1 struct {
+    Version uint8 `json:"version"`
     Sources map[string]string `json:"sources"`
+}
+
+type Source struct {
+    Name string `json:"name"`
+    Id string `json:"id"`
+}
+
+type Container struct {
+    Name string `json:"name"`
+    ContainerID string `json:"container_id"`
+    Sources []string `json:"sources"`
+    Desc string `json:"desc"`
+}
+
+type LabelFileVersion2 struct {
+    Version uint8 `json:"version"`
+    Containers []Container `json:"containers"`
+    Sources []Source `json:"sources"`
 }
 
 type DBToCWwiseSoundbank struct {
