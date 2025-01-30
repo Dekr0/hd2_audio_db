@@ -44,13 +44,10 @@ func run() error {
 	"Extract basic information of Wwise Soundbanks in (a) game archive(s), Wwise " +
 	"Soundbank binary content, and its Wwiser XML output")
 
-    labelNoStructFlag := flag.String("table-label", "",
-    "Import labels for audio source into the database (Overwrite the existing" +
-    "one). Accept a list of `.json` file path separated by `;`")
-
-    labelNoStructFolderFlag := flag.String("table-label-folder", "",
-    "Import labels for audio source into the database (Overwrite the existing" +
-    "one). Accept a folder path that contains a collection of `.json` file")
+    labelDirFlag := flag.String("import-label-folder", "",
+    "Import label and description for hierarchy objects. Accept a abs. / relative" +
+    " path of a directory that contains JSON files.",
+    )
 
 	xmlFlag := flag.String("xmls", "", "")
 
@@ -104,12 +101,8 @@ func run() error {
 		return wwise.ParseWwiserXML(*xmlFlag)
 	}
 
-    if *labelNoStructFlag != "" {
-        return db.UpdateSoundLabelsFromFileNoStruct(*labelNoStructFlag, ctx)
-    }
-
-    if *labelNoStructFolderFlag != "" {
-        return db.UpdateSoundLabelsFromFolderNoStruct(*labelNoStructFolderFlag, ctx)
+    if *labelDirFlag != "" {
+        return db.UpdateSoundLabelsFromFolder(*labelDirFlag, ctx)
     }
 
 	flag.Usage()
