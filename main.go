@@ -32,7 +32,7 @@ func run() error {
     "Completely db.Rewrite basic information about Wwise Soundbank into the DB" +
     "(Destructive). Used by DB maintainers.")
 
-	soundAssetsTableFlag := flag.Bool("table-sound-asset", false,
+	hierarchyObjTableFlag := flag.Bool("table-hierarchy-object", false,
 	"Completely db.Rewrite information about Wwise Soundbank and its hierarchy " +
 	" objects used in game into the DB (Destructive). Used by DB maintainers.")
 
@@ -84,7 +84,7 @@ func run() error {
         return db.RewriteAllSoundBank(ctx)
     }
 
-	if *soundAssetsTableFlag {
+	if *hierarchyObjTableFlag {
 		return db.RewriteAllSoundAssets(ctx)
 	}
 
