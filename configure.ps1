@@ -9,7 +9,10 @@ $dev = $true
 function Setup() {
     go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
     go install github.com/pressly/goose/v3/cmd/goose@latest
+    wget -Uri "https://github.com/bnnm/wwiser/releases/download/v20241210/wwiser.pyz" -OutFile wwiser.pyz
+    wget -Uri "https://github.com/bnnm/wwiser/releases/download/v20241210/wwnames.db3" wwnames.db3
     go get .
+    sqlc generate
 }
 
 function ExtractBank {
