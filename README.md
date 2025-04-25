@@ -42,7 +42,7 @@ for this go project.
 
 - If you want to know what audio sources that are completely independent on 
 their own (aka. safe to patch), go to 
-![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label) to look at them.
+[here](https://github.com/Dekr0/hd2_audio_db/tree/redesign/label) to look at them.
 
 ### Contributing
 
@@ -54,7 +54,7 @@ for crediting. If you want to contribute to audio source labeling for long terms
 I will grant you access to this repository but please be responsible and do not 
 do anything dangerous.
 - When writing labels, please following the general format all files use in 
-![here](https://github.com/Dekr0/hd2_audio_db/tree/main/label). For labeling audio 
+[here](https://github.com/Dekr0/hd2_audio_db/tree/redesign/label). For labeling audio 
 sources relative to weapons and stratagems, please following the naming convention 
 commonly used in about gun soudn design (https://youtu.be/_J56n496u6k?si=10nkfjoSItHGmTGE).
 
@@ -63,10 +63,10 @@ commonly used in about gun soudn design (https://youtu.be/_J56n496u6k?si=10nkfjo
 - If you want to directly interact the database with SQL, or other external 
 programming language. The data are stored in the SQLite database. If you want to 
 perform complex querying in the database, you can download 
-![sqlite3](https://www.sqlite.org/download.html) CLI tool or this sqlite3 
-![SQLite3 GUI tool](https://sqlitebrowser.org/) to do so.
+[sqlite3](https://www.sqlite.org/download.html) CLI tool or this sqlite3 
+[SQLite3 GUI tool](https://sqlitebrowser.org/) to do so.
 - The schema definition is located in 
-![here](https://github.com/Dekr0/hd2_audio_db/tree/main/sql/schema).
+[here](https://github.com/Dekr0/hd2_audio_db/tree/redesign/sql/schema).
 
 ### Understanding the Database schema
 
