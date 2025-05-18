@@ -1,48 +1,28 @@
--- name: CreateGameArchive :exec
-INSERT INTO game_archive (
-    db_id, game_archive_id, tags, categories
+-- name: InsertArchive :exec
+INSERT INTO archive (
+    aid, tags, categories, date_modified
 ) VALUES (
     ?, ?, ?, ?
 );
 
--- name: CreateSoundbank :exec
-INSERT INTO soundbank (
-    db_id, toc_file_id, soundbank_path_name, soundbank_readable_name, categories
-) VALUES (
-    ?, ?, ?, ?, ?
-);
+-- name: InsertAsset :exec
+INSERT INTO asset (
+    aid, fid, tid, 
+    data_offset, stream_file_offset, gpu_rsrc_offset,
+    unknown_01, unknown_02,
+    data_size, stream_size, gpu_rsrc_size,
+    unknown_03, unknown_04
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: CreateArchiveSounbankRelation :exec
-INSERT INTO game_archive_soundbank_relation (
-    game_archive_db_id, soundbank_db_id
-) VALUES (
-    ?, ?
-);
+-- name: InsertSoundbank :exec
+INSERT INTO soundbank (aid, fid, path, name, categories) VALUES (?, ?, ?, ?, ?);
 
--- name: CreateHierarchyObjectType :exec
-INSERT INTO hierarchy_object_type (
-    db_id, type
-) VALUES (
-    ?, ?
-);
+-- name: InsertHierarchy :exec
+INSERT INTO hierarchy (
+    aid, fid, hid,
+    type, parent,
+    label, tags, description
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
--- name: CreateHierarchyObject :exec
-INSERT INTO hierarchy_object (
-    db_id, wwise_object_id, type_db_id, parent_wwise_object_id, label, tags, description
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?
-);
-
--- name: CreateSoundbankHierarchyObjectRelation :exec
-INSERT INTO soundbank_hierarchy_object_relation (
-    soundbank_db_id, hierarchy_object_db_id
-) VALUES (
-    ?, ?
-);
-
--- name: CreateSound :exec
-INSERT INTO sound (
-    db_id, wwise_short_id
-) VALUES (
-    ?, ?
-);
+-- name: InsertSound :exec
+INSERT INTO sound (aid, fid, hid, sid) VALUES (?, ?, ?, ?);
