@@ -16,66 +16,30 @@ config() {
     sqlc generate
 }
 
-extractBnk() {
-    local aid="${1:-}"
-    go run . -extract-bank=$aid -data=$DATA
-}
-
-cleanXML() {
-    rm *.xml
-}
-
-cleanBnk() {
-    rm *.bnk
-}
-
-cleanErrorBnk() {
-    rm *.error
-}
-
-cleanAll() {
-    cleanXML
-    cleanBnk
-    cleanErrorBnk
-}
-
 generate() {
     if [ -e $GOOSE_DBSTRING ]; then
-        rm $GOOSE_DBSTRING
+        mv $GOOSE_DBSTRING "${GOOSE_DBSTRING}_backup"
     fi
+    goose up
+
     if [ -e log.txt ]; then
         rm log.txt
     fi
-    go run . -table-archive-all >> log.txt
-    go run . -table-bank >> log.txt
-    go run . -table-hierarchy-object >> log.txt
+
+    go run . --insert_archive
+    go run . --generate
+
+    sqlite3 $GOOSE_DBSTRING < sql/view.sql 
 }
 
-Test() {
-    if [ -e $GOOSE_DBSTRING ]; then
-        rm $GOOSE_DBSTRING
-    fi
-    if [ -e db/$GOOSE_DBSTRING ]; then
-        rm db/$GOOSE_DBSTRING
-    fi
-    goose up
-    go clean --testcache
-    mv $GOOSE_DBSTRING db
-    go test ./db -v -run TestGenerate
+extract_all_soundbank() {
+    go run . --extract_all_soundbank --dest $1
 }
 
-SetupTest() {
-    if [ -e $GOOSE_DBSTRING ]; then
-        rm $GOOSE_DBSTRING
-    fi
-    if [ -e db/$GOOSE_DBSTRING ]; then
-        rm db/$GOOSE_DBSTRING
-    fi
-    goose up
-    go clean --testcache
-    mv $GOOSE_DBSTRING db
+extract_soundbank() {
+    go run . --extract_soundbank --dest $1
 }
 
-createView() {
-    sql/view.sql | sqlite3 $GOOSE_DBSTRING
+extract_soundbank_db() {
+    go run . --extract_soundbank_db --dest $1
 }
