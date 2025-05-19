@@ -77,14 +77,18 @@ func (r *Reader) RelSeek(p int) error {
 	return nil
 }
 
-func (r *Reader) ReadUnsafe(d []byte) {
-	err := r.Read(d)
+func (r *Reader) Read(d []byte) (int, error) {
+	return r.b.Read(d)
+}
+
+func (r *Reader) ReadFullUnsafe(d []byte) {
+	err := r.ReadFull(d)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (r *Reader) Read(d []byte) error {
+func (r *Reader) ReadFull(d []byte) error {
 	nread, err := io.ReadFull(&r.b, d)
 	if err != nil {
 		return err
