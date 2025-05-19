@@ -2,8 +2,8 @@ CREATE VIEW IF NOT EXISTS hierarchy_view AS
 SELECT
     hierarchy.aid,
     hierarchy.fid,
-    hierarchy.path,
-    hiearchy.hid,
+    soundbank.path,
+    hierarchy.hid,
     hierarchy.type,
     hierarchy.parent,
     hierarchy.label,
