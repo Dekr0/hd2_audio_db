@@ -129,8 +129,8 @@ func testGatherInPlaceEdgeCaseParallel(t *testing.T) {
 
 func TestGenerate(t *testing.T) {
 	useStderr()
-	MaxBankParser = 0
-	parser.MaxParser = 1
+	MaxBankParser = 4
+	parser.MaxParser = 4
 	if err := Generate(context.Background(), os.Getenv("DATA")); err != nil {
 		t.Fatal(err)
 	}
@@ -309,5 +309,65 @@ func benchmarkGatherInPlace8(b *testing.B) {
 		r.AbsSeekUnsafe(0)
 		b.ResetTimer()
 		parseBanksInPlace(&a, r, p)
+	}
+}
+
+func TestExportAllSoundbank(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 60)
+	defer cancel()
+
+	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+
+	MaxArchiveReder = 2
+	MaxBankWriter = 4
+
+	ExportAllSoundbank(ctx, data, "output")
+}
+
+func TestExportSoundbanks(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 360)
+	defer cancel()
+
+	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+
+	dest := "output"
+	stat, err := os.Lstat(dest)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.Mkdir(dest, 0777); err != nil {
+				t.Fatal(err)
+			}
+		}
+	} else {
+		if !stat.IsDir() {
+			t.Fatalf("%s is not a directory.", dest)
+		}
+	}
+
+	MaxDirReader = 0
+	MaxArchiveReder = 0
+	MaxBankWriter = 0
+
+	exportSoundbanks(
+		nil, ctx,
+		filepath.Join(data, "e75f556a740e00c9"), "output",
+	)
+}
+
+func TestSoundbanksTUI(t *testing.T) {
+	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+
+	if err := ExportSoundbanksTUI(context.Background(), data, "output"); 
+	   err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSoundbanksTUIDB(t *testing.T) {
+	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+
+	if err := ExportSoundbanksTUIDB(context.Background(), data, "output"); 
+	   err != nil {
+		t.Fatal(err)
 	}
 }
