@@ -850,7 +850,6 @@ func ExportSoundbanksTUI(ctx context.Context, data string, dest string) error {
 		if sel == "" {
 			continue
 		}
-		slog.Error(sel)
 		select {
 		case sem <- struct{}{}:
 			w.Add(1)
@@ -990,6 +989,7 @@ func ExportSoundbanksTUIDB(ctx context.Context, data string, dest string) error 
 
 	sem := make(chan struct{}, MaxArchiveReder)
 	var w sync.WaitGroup
+	marks := []string{}
 	sels := strings.Split(string(r.sels), "\n")
 	for _, sel := range sels {
 		sel = strings.Trim(sel, "\n")
@@ -997,7 +997,13 @@ func ExportSoundbanksTUIDB(ctx context.Context, data string, dest string) error 
 			continue
 		}
 		splits := strings.Split(sel, " | ")
-		slog.Error(sel)
+		if slices.ContainsFunc(marks, func(mark string) bool {
+			return strings.Compare(mark, splits[0]) == 0
+		}) {
+			continue
+		}
+		marks = append(marks, splits[0])
+		
 		select {
 		case sem <- struct{}{}:
 			w.Add(1)
