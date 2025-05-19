@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"database/sql"
@@ -8,7 +9,10 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strings"
 	"sync"
 	"time"
@@ -20,8 +24,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var MaxArchiveReader = 4
-var MaxBankParser = 0
+var MaxDirReader = 4
+var MaxArchiveReder = 2
+var MaxBankParser = 4
+var MaxBankWriter = 4
 var HircMetric = 0
 
 func conn() (*sql.DB, error) {
@@ -39,7 +45,7 @@ func WriteArchives(ctx context.Context, data string) error {
 	timeout, cancel := context.WithTimeout(ctx, time.Second * 8)
 	defer cancel()
 
-	sem := make(chan struct{}, MaxArchiveReader)
+	sem := make(chan struct{}, MaxDirReader)
 
 	var w sync.WaitGroup
 
@@ -167,7 +173,6 @@ func Generate(ctx context.Context, data string) error {
 			soundInsert = append(soundInsert, localSoundInsert...)
 		}
 	}
-	fmt.Println(HircMetric)
 
 	c, err = conn()
 	if err != nil {
@@ -305,7 +310,7 @@ func parseBanks(
 			if a.Headers[w].FileID == a.Headers[b].FileID {
 				r.AbsSeekUnsafe(uint(a.Headers[w].DataOffset))
 				data := make([]byte, a.Headers[w].DataSize, a.Headers[w].DataSize)
-				if err := r.Read(data); err != nil {
+				if err := r.ReadFull(data); err != nil {
 					slog.Error(
 						"Failed to read data of wwise dependency",
 						"path", p,
@@ -435,7 +440,7 @@ func parseBanksInPlace(a *parser.Archive, r *wio.Reader, p string) {
 			if a.Headers[w].FileID == a.Headers[b].FileID {
 				r.AbsSeekUnsafe(uint(a.Headers[w].DataOffset))
 				data := make([]byte, a.Headers[w].DataSize, a.Headers[w].DataSize)
-				if err := r.Read(data); err != nil {
+				if err := r.ReadFull(data); err != nil {
 					slog.Error(
 						"Failed to read data of wwise dependency",
 						"path", p,
@@ -462,7 +467,7 @@ func parseBanksInPlace(a *parser.Archive, r *wio.Reader, p string) {
 			r.AbsSeekUnsafe(uint(h.DataOffset + 16))
 
 			data := make([]byte, h.DataSize - 16, h.DataSize - 16)
-			r.ReadUnsafe(data)
+			r.ReadFullUnsafe(data)
 
 			ir := wio.NewInPlaceReader(data, wio.ByteOrder)
 			hirc := parser.ParseBankInPlace(ir, h.DataOffset + uint64(h.DataSize))
@@ -486,10 +491,522 @@ func parseBankInPlace(w *sync.WaitGroup, p string, h *parser.AssetHeader) {
 	r.AbsSeekUnsafe(uint(h.DataOffset + 16))
 
 	data := make([]byte, h.DataSize - 16, h.DataSize - 16)
-	r.ReadUnsafe(data)
+	r.ReadFullUnsafe(data)
 	f.Close()
 
 	ir := wio.NewInPlaceReader(data, wio.ByteOrder)
 	parser.ParseBankInPlace(ir, h.DataOffset + uint64(h.DataSize))
 	w.Done()
+}
+
+func ExportAllSoundbank(ctx context.Context, data string, dest string) error {
+	stat, err := os.Lstat(dest)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.Mkdir(dest, 0777); err != nil {
+				return err
+			}
+		}
+	} else if !stat.IsDir() {
+		return fmt.Errorf("%s is a file", dest)
+	}
+
+	f, err := os.Open(data)
+	if err != nil {
+		return err
+	}
+
+	timeout, cancel := context.WithTimeout(ctx, time.Second * 8)
+	defer cancel()
+	var w sync.WaitGroup
+
+	sem := make(chan struct{}, MaxArchiveReder)
+	for {
+		entries, err := f.ReadDir(1024)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+		for _, entry := range entries {
+			if entry.IsDir() { continue }
+
+			ext := filepath.Ext(entry.Name())
+			if strings.Compare(ext, ".stream") == 0 { continue }
+			if strings.Compare(ext, ".gpu_resources") == 0 { continue }
+			if strings.Compare(ext, ".ini") == 0 { continue }
+			if strings.Compare(ext, ".data") == 0 { continue }
+			if strings.Contains(ext, "patch") { continue }
+
+			select {
+			case <- timeout.Done():
+				return timeout.Err()
+			case sem <- struct{}{}:
+				w.Add(1)
+				go exportSoundbanks(&w, ctx, filepath.Join(data, entry.Name()), dest)
+			default:
+				exportSoundbanks(nil, ctx, filepath.Join(data, entry.Name()), dest)
+			}
+		}
+	}
+	w.Wait()
+	return nil
+}
+
+func exportSoundbanks(
+	w *sync.WaitGroup,
+	ctx context.Context,
+	p string,
+	dest string,
+) {
+	if w != nil {
+		defer w.Done()
+	}
+
+	f, err := os.Open(p)
+	if err != nil {
+		slog.Error("Failed to open archive", "path", p)
+		panic(err)
+	}
+	defer f.Close()
+
+	a := parser.Archive{}
+	r := wio.NewReader(f, wio.ByteOrder)
+
+	parseHeader(&a, r)
+
+	var ww sync.WaitGroup
+	sem := make(chan struct{}, MaxBankWriter)
+
+	var bh *parser.AssetHeader
+	var wh *parser.AssetHeader
+	for i, b := range a.SoundBnks {
+		bh = &a.Headers[b]
+
+		var path string = fmt.Sprintf("Unknown %d.bnk", i)
+
+		for _, w := range a.Deps {
+			wh = &a.Headers[w]
+
+			if wh.FileID == bh.FileID {
+				r.AbsSeekUnsafe(uint(wh.DataOffset))
+
+				data := make([]byte, wh.DataSize, wh.DataSize)
+				if err := r.ReadFull(data); err != nil {
+					slog.Error(
+						"Failed to read data of wwise dependency",
+						"path", p,
+						"fid", wh.FileID,
+					)
+					panic(err)
+				}
+
+				path = string(
+					bytes.ReplaceAll(
+						bytes.ReplaceAll(data[5:], []byte{'\u0000'}, []byte{}),
+						[]byte{'/'},
+						[]byte{'_'},
+					),
+				)
+				path = strings.ReplaceAll(path, "content_audio_", "")
+				path += ".bnk"
+
+				break
+			}
+		}
+
+
+		sf, err := os.Open(p)
+		if err != nil {
+			slog.Error("Failed to open archive", "path", p)
+			panic(err)
+		}
+
+		sr := wio.NewReader(
+			io.NewSectionReader(
+				sf,
+				int64(bh.DataOffset + 16),
+				int64(bh.DataSize - 16),
+			),
+			wio.ByteOrder,
+		)
+
+		select {
+		case <- ctx.Done():
+			return
+		case sem <- struct{}{}:
+			ww.Add(1)
+			go exportSoundbank(
+				&ww, ctx, 
+				sf, sr, 
+				filepath.Base(p), bh.FileID, filepath.Join(dest, path),
+			)
+		default:
+			exportSoundbank(
+				nil, ctx,
+				sf, sr,
+				filepath.Base(p), bh.FileID, filepath.Join(dest, path),
+			)
+		}
+	}
+	ww.Wait()
+}
+
+func exportSoundbank(
+	w *sync.WaitGroup,
+	ctx context.Context,
+	i *os.File,
+	r *wio.Reader,
+	aid string,
+	fid uint64,
+	p string,
+) {
+	if w != nil { defer w.Done() }
+	if i != nil { defer i.Close() }
+
+	f, err := os.Create(p)
+	if err != nil {
+		slog.Error(
+			"Failed to create file",
+			"path", p,
+			"aid", aid,
+			"fid", fid,
+			"error", err,
+		)
+		return
+	}
+	writer := bufio.NewWriterSize(f, 4096)
+	defer f.Close()
+
+	// BKHD
+	data := make([]byte, 12, 12)
+	_, err = r.Read(data)
+	if err != nil {
+		slog.Error(
+			"Failed to read BKHD",
+			"path", p,
+			"aid", aid,
+			"fid", fid,
+			"error", err,
+		)
+		return
+	}
+	data[0x08] = 0x8D
+	data[0x09] = 0x00
+	data[0x0A] = 0x00
+	data[0x0B] = 0x00
+	_, err = writer.Write(data)
+	if err != nil {
+		slog.Error(
+			"Failed to write all bytes",
+			"path", p,
+			"aid", aid, 
+			"fid", fid,
+			"error", err,
+		)
+		return
+	}
+	if err := writer.Flush(); err != nil {
+		slog.Error(
+			"Failed to flush bytes",
+			"path", p,
+			"aid", aid, 
+			"fid", fid,
+			"error", err,
+		)
+		return
+	}
+
+	data = slices.Grow(data, 4096 - 12)
+	for i := range cap(data) {
+		if i < len(data) {
+			data[i] = 0
+		} else {
+			data = append(data, 0)
+		}
+	}
+	for {
+		select {
+		case <- ctx.Done():
+			return
+		default:
+		}
+		nread, err := r.Read(data)
+		if nread < len(data) {
+			fmt.Print()
+		}
+		if err != nil {
+			if err == io.EOF {
+				if nread > 0 {
+					_, err = writer.Write(data[:nread:nread])
+					slog.Error(
+						"Failed to write all bytes",
+						"path", p,
+						"aid", aid,
+						"fid", fid,
+						"error", err,
+					)
+				}
+				return
+			}
+			slog.Error(
+				"Failed to write all bytes",
+				"path", p,
+				"aid", aid,
+				"fid", fid,
+				"error", err,
+			)
+			return
+		}
+		_, err = f.Write(data[:nread:nread])
+		if err != nil {
+			slog.Error(
+				"Failed to write all bytes",
+				"path", p,
+				"aid", aid,
+				"fid", fid,
+				"error", err,
+			)
+		}
+	}
+}
+
+type Result struct {
+	sels []byte
+	err    error
+}
+
+func ExportSoundbanksTUI(ctx context.Context, data string, dest string) error {
+	stat, err := os.Lstat(dest)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.Mkdir(dest, 0777); err != nil {
+				return err
+			}
+		}
+	} else if !stat.IsDir() {
+		return fmt.Errorf("%s is a file", dest)
+	}
+
+	fzf := "fzf"
+	if runtime.GOOS == "Windows" {
+		fzf = "fzf.exe"
+	}
+
+	cmd := exec.CommandContext(ctx, fzf, "-m")
+	p, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+	defer cmd.Cancel()
+	defer p.Close()
+
+	c := make(chan *Result, 1) 
+	go func() {
+		result, err := cmd.Output()
+		c <- &Result{result, err}
+	}()
+
+	f, err := os.Open(data)
+	if err != nil {
+		return err
+	}
+
+	var r *Result
+	for r == nil {
+		r = poll(ctx, c)
+		if r != nil {
+			break
+		}
+
+		entries, err := f.ReadDir(1024)
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
+
+		r = writeEntryToFzF(ctx, c, cmd, entries, p)
+	}
+
+	if r == nil {
+		select {
+		case <- ctx.Done():
+			return ctx.Err()
+		case r = <- c:
+		}
+	}
+	if r.err != nil {
+		return r.err
+	}
+
+	sem := make(chan struct{}, MaxArchiveReder)
+	var w sync.WaitGroup
+	sels := strings.Split(string(r.sels), "\n")
+	for _, sel := range sels {
+		sel = strings.Trim(sel, "\n")
+		if sel == "" {
+			continue
+		}
+		slog.Error(sel)
+		select {
+		case sem <- struct{}{}:
+			w.Add(1)
+			go exportSoundbanks(&w, ctx, filepath.Join(data, sel), dest)
+		default:
+			exportSoundbanks(nil, ctx, filepath.Join(data, sel), dest)
+		}
+	}
+	w.Wait()
+
+	return nil
+}
+
+func poll(ctx context.Context, c chan *Result) *Result {
+	select {
+	case <- ctx.Done():
+		return &Result{[]byte{}, ctx.Err()}
+	case r := <- c:
+		return r
+	default:
+		return nil
+	}
+}
+
+func writeEntryToFzF(
+	ctx context.Context,
+	c chan *Result,
+	cmd *exec.Cmd,
+	entries []os.DirEntry,
+	p io.WriteCloser,
+) *Result {
+	for i, entry := range entries {
+		select {
+		case <- ctx.Done():
+			return &Result{[]byte{}, ctx.Err()}
+		case r := <- c:
+			return r
+		default:
+			ext := filepath.Ext(entry.Name())
+			if strings.Compare(ext, ".stream") == 0 { continue }
+			if strings.Compare(ext, ".gpu_resources") == 0 { continue }
+			if strings.Compare(ext, ".ini") == 0 { continue }
+			if strings.Compare(ext, ".data") == 0 { continue }
+			if strings.Contains(ext, "patch") { continue }
+
+			out := entry.Name()
+			if i < len(entries) - 1 {
+				out += "\n"
+			}
+
+			if _, err := p.Write([]byte(out)); err != nil {
+				cmd.Cancel()
+				return &Result{[]byte{}, err}
+			}
+		}
+	}
+	return nil
+}
+
+func ExportSoundbanksTUIDB(ctx context.Context, data string, dest string) error {
+	stat, err := os.Lstat(dest)
+	if err != nil {
+		if os.IsNotExist(err) {
+			if err := os.Mkdir(dest, 0777); err != nil {
+				return err
+			}
+		}
+	} else if !stat.IsDir() {
+		return fmt.Errorf("%s is a file", dest)
+	}
+
+	co, err := conn()
+	if err != nil {
+		return err
+	}
+	defer co.Close()
+	q := database.New(co)
+	bnks, err := q.GetAllSoundbank(ctx)
+	if err != nil {
+		return err
+	}
+	if len(bnks) <= 0 {
+		slog.Warn("No records of sound bank available")
+		return nil
+	}
+	co.Close()
+
+	fzf := "fzf"
+	if runtime.GOOS == "Windows" {
+		fzf = "fzf.exe"
+	}
+
+	cmd := exec.CommandContext(ctx, fzf, "-m")
+	p, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+	defer cmd.Cancel()
+	defer p.Close()
+
+	c := make(chan *Result, 1) 
+	go func() {
+		result, err := cmd.Output()
+		c <- &Result{result, err}
+	}()
+
+	var r *Result
+	for i, bnk := range bnks {
+		select {
+		case <- ctx.Done():
+			return ctx.Err()
+		case r = <- c:
+			break
+		default:
+			opt := fmt.Sprintf("%s | %s", bnk.Aid, bnk.Path)
+			if i < len(bnks) - 1 {
+				opt += "\n"
+			}
+			if _, err := p.Write([]byte(opt)); err != nil {
+				return err
+			}
+		}
+	}
+
+	if r == nil {
+		select {
+		case <- ctx.Done():
+			return ctx.Err()
+		case r = <- c:
+		}
+	}
+	if r.err != nil {
+		return r.err
+	}
+	cmd.Cancel()
+	p.Close()
+
+	sem := make(chan struct{}, MaxArchiveReder)
+	var w sync.WaitGroup
+	sels := strings.Split(string(r.sels), "\n")
+	for _, sel := range sels {
+		sel = strings.Trim(sel, "\n")
+		if sel == "" {
+			continue
+		}
+		splits := strings.Split(sel, " | ")
+		slog.Error(sel)
+		select {
+		case sem <- struct{}{}:
+			w.Add(1)
+			go exportSoundbanks(&w, ctx, filepath.Join(data, splits[0]), dest)
+		default:
+			exportSoundbanks(nil, ctx, filepath.Join(data, splits[0]), dest)
+		}
+	}
+	w.Wait()
+
+	return nil
 }
