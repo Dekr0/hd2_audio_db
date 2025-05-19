@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "sources": {
+        "railgun_safe_mode_alert": "81199657",
+    
+        "railgun_chargeup": "226190496",
+    
+        "railgun_reload_01": "387732094",
+        "railgun_reload_02": "429096148",
+        "railgun_reload_03": "327431745",
+        "railgun_reload_04": "267620614",
+        "railgun_reload_05": "962573960",
+        
+        "railgun_tail_bass_01": "48754367",
+        "railgun_tail_bass_02": "477207749",
+        "railgun_tail_bass_03": "534284935",
+        "railgun_tail_bass_04": "22225462",
+        "railgun_tail_bass_05": "987105079",
+        "railgun_tail_bass_06": "248263551",
+        "railgun_tail_bass_07": "268589845",
+        
+        "railgun_charge_loop_main": "928078613",
+        "railgun_charge_loop_sub": "84406538"
+    }
+}

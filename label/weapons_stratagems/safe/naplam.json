@@ -1,0 +1,23 @@
+{
+    "version": 1,
+    "sources": {
+        "orbital_naplam_impact_01": "609655284",
+        "orbital_naplam_impact_02": "81050292",
+        "orbital_naplam_impact_03": "316739736",
+        "orbital_naplam_impact_04": "138715839",
+    
+        "naplam_burning_01": "403178424",
+        "naplam_burning_02": "959106440",
+        "naplam_burning_03": "903444524",
+    
+        "naplam_warhead_exp_01": "650727278",
+        "naplam_warhead_exp_02": "811969044",
+        "naplam_warhead_exp_03": "711013168",
+        "naplam_warhead_exp_04": "57313202",
+    
+        "naplam_echo_01": "159539217",
+        "naplam_echo_02": "294320429",
+        "naplam_echo_03": "236163285",
+        "naplam_echo_04": "10276578"
+    }
+}

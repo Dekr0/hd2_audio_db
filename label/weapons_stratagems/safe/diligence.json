@@ -1,0 +1,39 @@
+{
+    "version": 1,
+    "sources": {
+        "diligence_mech_01": "770032032",
+        "diligence_mech_02": "770578545",
+        "diligence_mech_03": "228647861",
+        "diligence_mech_04": "367642537",
+        "diligence_mech_05": "633307365",
+        
+        "diligence_fire_body_01": "373670867",
+        "diligence_fire_body_02": "47373053",
+        "diligence_fire_body_03": "886421128",
+        "diligence_fire_body_04": "452957894",
+        "diligence_fire_body_05": "96521142",
+        
+        "diligence_tail_close_01": "1059318184",
+        "diligence_tail_close_02": "255176092",
+        "diligence_tail_close_03": "834227038",
+        "diligence_tail_close_04": "831650770",
+        "diligence_tail_close_05": "989178714",
+        "diligence_tail_close_06": "590308564",
+        
+        "diligence_bolt_forward_01": "949543845",
+        "diligence_bolt_forward_02": "540578400",
+        "diligence_bolt_forward_03": "1004439290",
+        
+        "diligence_bolt_back_01": "224957304",
+        "diligence_bolt_back_02": "113945009",
+        "diligence_bolt_back_03": "510284008",
+        
+        "diligence_mag_in_01": "836761035",
+        "diligence_mag_in_02": "41500478",
+        "diligence_mag_in_03": "542512334",
+        
+        "diligence_mag_out_01": "558443132",
+        "diligence_mag_out_02": "160331316",
+        "diligence_mag_out_03": "943769138"
+    }
+}

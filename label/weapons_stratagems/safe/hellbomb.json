@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "sources": {
+        "hellbomb_exp_bass_01": "223522590",
+        "hellbomb_exp_bass_02": "1048609434",
+        "hellbomb_exp_bass_03": "788798642",
+        "hellbomb_exp_bass_04": "174959513",
+    
+        "hellbomb_exp_01": "413421043",
+        "hellbomb_exp_02": "74089415",
+        "hellbomb_exp_03": "443004853",
+    
+        "hellbomb_echo_far_01": "427584438",
+        "hellbomb_echo_far_02": "389654354",
+        "hellbomb_echo_far_03": "586463512",
+        "hellbomb_echo_far_04": "941176843",
+    
+        "hellbomb_echo_close_01": "857722295",
+        "hellbomb_echo_close_02": "1008381278",
+        "hellbomb_echo_close_03": "35223242",
+        "hellbomb_echo_close_04": "388459848",
+    
+        "hellbomb_echo_bass": "645485301"
+    }
+}

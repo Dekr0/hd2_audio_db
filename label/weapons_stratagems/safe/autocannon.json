@@ -1,40 +1,49 @@
 {
-    "ac_single_start_01": "8350094",
-    "ac_single_start_02": "1013945195",
-    "ac_single_start_03": "791155873",
-    "ac_single_start_04": "995529820",
-    "ac_single_start_05": "624925945",
-
-    "ac_single_tail_01": "379684470",
-    "ac_single_tail_02": "611960788",
-    "ac_single_tail_03": "958064957",
-    "ac_single_tail_04": "478130554",
-    "ac_single_tail_05": "781342411",
-    "ac_single_tail_06": "124553906",
-
-    "ac_single_mech_01": "130652128",
-    "ac_single_mech_02": "764932916",
-    "ac_single_mech_03": "447420224",
-    "ac_single_mech_04": "306972886",
-    "ac_single_mech_05": "442256861",
-
-    "ac_tactical_reload_01": "166780316",
-    "ac_tactical_reload_02": "886534560",
-    "ac_tactical_reload_03": "464257053",
-
-    "ac_empty_reload_0_01": "57982276",
-    "ac_empty_reload_0_02": "407571396",
-    "ac_empty_reload_0_03": "983533235",
-
-    "ac_bolt_cocking_back_01": "1049627656",
-    "ac_bolt_cocking_back_02": "813980959",
-    "ac_bolt_cocking_back_03": "787675556",
-
-    "ac_empty_reload_1_01": "1008828905",
-    "ac_empty_reload_1_02": "717416981",
-    "ac_empty_reload_1_03": "315672315",
-
-    "ac_bolt_cocking_release_01": "245923210",
-    "ac_bolt_cocking_release_02": "420024560",
-    "ac_bolt_cocking_release_03": "1015987450"
+    "version": 1,
+    "sources": {
+        "ac_transient_close_01": "8350094",
+        "ac_transient_close_02": "1013945195",
+        "ac_transient_close_03": "791155873",
+        "ac_transient_close_04": "995529820",
+        "ac_transient_close_05": "624925945",
+        
+        "ac_supersonic_tail_01": "7800286587450350841",
+        "ac_supersonic_tail_02": "10479539810813947192",
+        "ac_supersonic_tail_03": "7041521836473975961",
+        "ac_supersonic_tail_04": "12999924447481456541",
+        "ac_supersonic_tail_05": "6655044290266582208",
+    
+        "ac_echo_close_01": "379684470",
+        "ac_echo_close_02": "611960788",
+        "ac_echo_close_03": "958064957",
+        "ac_echo_close_04": "478130554",
+        "ac_echo_close_05": "781342411",
+        "ac_echo_close_06": "124553906",
+    
+        "ac_mech_01": "130652128",
+        "ac_mech_02": "764932916",
+        "ac_mech_03": "447420224",
+        "ac_mech_04": "306972886",
+        "ac_mech_05": "442256861",
+    
+        "ac_tactical_reload_01": "166780316",
+        "ac_tactical_reload_02": "886534560",
+        "ac_tactical_reload_03": "464257053",
+    
+        "ac_empty_reload_0_01": "57982276",
+        "ac_empty_reload_0_02": "407571396",
+        "ac_empty_reload_0_03": "983533235",
+    
+        "ac_bolt_cocking_back_01": "1049627656",
+        "ac_bolt_cocking_back_02": "813980959",
+        "ac_bolt_cocking_back_03": "787675556",
+    
+        "ac_empty_reload_1_01": "1008828905",
+        "ac_empty_reload_1_02": "717416981",
+        "ac_empty_reload_1_03": "315672315",
+    
+        "ac_bolt_cocking_forward_01": "245923210",
+        "ac_bolt_cocking_forward_02": "420024560",
+        "ac_bolt_cocking_forward_03": "1015987450"
+    }
 }

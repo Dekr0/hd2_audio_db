@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "sources": {
+        "ac_walker_cannon_kick_01": "260125392",
+        "ac_walker_cannon_kick_02": "407687855",
+        "ac_walker_cannon_kick_03": "816172246",
+        "ac_walker_cannon_kick_04": "386699084",
+        "ac_walker_cannon_kick_05": "539166127",
+        "ac_walker_cannon_kick_06": "662759502",
+        
+        "ac_walker_cannon_mech_01": "666000130",
+        "ac_walker_cannon_mech_02": "891973340",
+        "ac_walker_cannon_mech_03": "640606470",
+        "ac_walker_cannon_mech_04": "858271035",
+        "ac_walker_cannon_mech_05": "789524327",
+        "ac_walker_cannon_mech_06": "1062854911",
+        "ac_walker_cannon_mech_07": "567398501",
+        "ac_walker_cannon_mech_08": "399599120",
+        "ac_walker_cannon_mech_09": "713403673",
+        
+        "ac_walker_cannon_supersonic_01": "791363838",
+        "ac_walker_cannon_supersonic_02": "146302657",
+        "ac_walker_cannon_supersonic_03": "465438923",
+        "ac_walker_cannon_supersonic_04": "4128631",
+        "ac_walker_cannon_supersonic_05": "524950127",
+        
+        "ac_walker_cannon_transient_close_01": "439872554",
+        "ac_walker_cannon_transient_close_02": "619641616",
+        "ac_walker_cannon_transient_close_03": "112390178",
+        "ac_walker_cannon_transient_close_04": "251494329",
+        "ac_walker_cannon_transient_close_05": "490782126",
+        "ac_walker_cannon_transient_close_06": "861992546",
+        "ac_walker_cannon_transient_close_07": "674684472"
+    }
+}

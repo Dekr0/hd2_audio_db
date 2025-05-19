@@ -1,0 +1,63 @@
+{
+    "version": 1,
+    "sources": {
+        "recoiless_bass_01": "403515423",
+    
+        "recoiless_mech_01": "964885064",
+        "recoiless_mech_02": "1022781945",
+        "recoiless_mech_03": "737335587",
+        "recoiless_mech_04": "978889842",
+        "recoiless_mech_05": "1066444302",
+        "recoiless_mech_06": "132044608",
+    
+        "recoiless_tail_01": "29209415",
+        "recoiless_tail_02": "173488498",
+        "recoiless_tail_03": "447969471",
+        "recoiless_tail_04": "707872094",
+        "recoiless_tail_05": "717602197",
+    
+        "recoiless_tube_tail_01": "661067657",
+        "recoiless_tube_tail_02": "881350522",
+        "recoiless_tube_tail_03": "250793479",
+        "recoiless_tube_tail_04": "251501562",
+        "recoiless_tube_tail_05": "896923314",
+    
+        "recoiless_tube_transient_01": "491849867",
+        "recoiless_tube_transient_02": "1004774439",
+        "recoiless_tube_transient_03": "318840185",
+        "recoiless_tube_transient_04": "691453467",
+        "recoiless_tube_transient_05": "28376105",
+    
+        "recoiless_fetch_warhead_01": "584453627",
+        "recoiless_fetch_warhead_02": "979782962",
+        "recoiless_fetch_warhead_03": "364614370",
+    
+        "recoiless_reload_warhead_eject_01": "267785761",
+        "recoiless_reload_warhead_eject_02": "1029881968",
+        "recoiless_reload_warhead_eject_03": "134239311",
+    
+        "recoiless_reload_warhead_insert_01": "865556916",
+        "recoiless_reload_warhead_insert_02": "14917297",
+        "recoiless_reload_warhead_insert_03": "56667435",
+    
+        "recoiless_reload_hatch_lock_clip_0_01": "26965555",
+        "recoiless_reload_hatch_lock_clip_0_02": "769016298",
+        "recoiless_reload_hatch_lock_clip_0_03": "746356134",
+    
+        "recoiless_reload_hatch_close_01": "643162213",
+        "recoiless_reload_hatch_close_02": "731093107",
+        "recoiless_reload_hatch_close_03": "719210906",
+    
+        "recoiless_reload_hatch_lock_clip_1_01": "711249715",
+        "recoiless_reload_hatch_lock_clip_1_02": "177818040",
+        "recoiless_reload_hatch_lock_clip_1_03": "878574263",
+    
+        "recoiless_team_reload_full_01": "712574861",
+        "recoiless_team_reload_full_02": "1068570216",
+        "recoiless_team_reload_full_03": "399225491",
+    
+        "recoiless_reload_hatch_open_01": "1018262330",
+        "recoiless_reload_hatch_open_02": "70883559",
+        "recoiless_reload_hatch_open_03": "11136157"
+    }
+}

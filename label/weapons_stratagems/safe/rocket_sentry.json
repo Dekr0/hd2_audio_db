@@ -1,37 +1,39 @@
 {
-    "rocket_sentry_flying_01": "913177925",
-    "rocket_sentry_flying_02": "815002604",
-    "rocket_sentry_flying_03": "997194440",
-
-    "rocket_sentry_reload_0_01": "745609321",
-    "rocket_sentry_reload_0_02": "301004051",
-    "rocket_sentry_reload_0_03": "317046668",
-    "rocket_sentry_reload_0_04": "236095411",
-    "rocket_sentry_reload_0_05": "719329833",
-    "rocket_sentry_reload_0_06": "617040373",
-    "rocket_sentry_reload_0_07": "555944448",
-    "rocket_sentry_reload_0_08": "245603530"
-
-    "rocket_sentry_idle_mech_01": "1041198228",
-    "rocket_sentry_idle_mech_02": "996112203",
-    "rocket_sentry_idle_mech_03": "242383957",
-    "rocket_sentry_idle_mech_04": "97740436",
-
-    "rocket_sentry_fire_mech_01": "503642986",
-    "rocket_sentry_fire_mech_02": "679611238",
-    "rocket_sentry_fire_mech_03": "251535529",
-    "rocket_sentry_fire_mech_04": "745293544",
-    "rocket_sentry_fire_mech_05": "477894646",
-
-    "rocket_sentry_fire_kick_01": "725471908",
-    "rocket_sentry_fire_kick_02": "686696377",
-    "rocket_sentry_fire_kick_03": "736480498",
-    "rocket_sentry_fire_kick_04": "904471682",
-    "rocket_sentry_fire_kick_05": "22151183",
-
-    "rocket_sentry_fire_start_tail_01": "53158528",
-    "rocket_sentry_fire_start_tail_02": "627754482",
-    "rocket_sentry_fire_start_tail_03": "1071311764",
-    "rocket_sentry_fire_start_tail_04": "581815808",
-    "rocket_sentry_fire_start_tail_05": "421724189"
+    "sources": {
+        "rocket_sentry_flying_01": "913177925",
+        "rocket_sentry_flying_02": "815002604",
+        "rocket_sentry_flying_03": "997194440",
+    
+        "rocket_sentry_reload_00_01": "745609321",
+        "rocket_sentry_reload_00_02": "301004051",
+        "rocket_sentry_reload_00_03": "317046668",
+        "rocket_sentry_reload_00_04": "236095411",
+        "rocket_sentry_reload_00_05": "719329833",
+        "rocket_sentry_reload_00_06": "617040373",
+        "rocket_sentry_reload_00_07": "555944448",
+        "rocket_sentry_reload_00_08": "245603530",
+    
+        "rocket_sentry_idle_mech_01": "1041198228",
+        "rocket_sentry_idle_mech_02": "996112203",
+        "rocket_sentry_idle_mech_03": "242383957",
+        "rocket_sentry_idle_mech_04": "97740436",
+    
+        "rocket_sentry_mech_01": "503642986",
+        "rocket_sentry_mech_02": "679611238",
+        "rocket_sentry_mech_03": "251535529",
+        "rocket_sentry_mech_04": "745293544",
+        "rocket_sentry_mech_05": "477894646",
+    
+        "rocket_sentry_bass_01": "725471908",
+        "rocket_sentry_bass_02": "686696377",
+        "rocket_sentry_bass_03": "736480498",
+        "rocket_sentry_bass_04": "904471682",
+        "rocket_sentry_bass_05": "22151183",
+    
+        "rocket_sentry_transient_tail_01": "53158528",
+        "rocket_sentry_transient_tail_02": "627754482",
+        "rocket_sentry_transient_tail_03": "1071311764",
+        "rocket_sentry_transient_tail_04": "581815808",
+        "rocket_sentry_transient_tail_05": "421724189"
+    }
 }

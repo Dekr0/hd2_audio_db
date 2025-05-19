@@ -1,10 +1,5 @@
-module dekr0/hd-audio-archive-db
+module dekr0/hd2_audio_db
 
-go 1.23.2
+go 1.23.3
 
-require github.com/mattn/go-sqlite3 v1.14.24
-
-require (
-	github.com/google/uuid v1.6.0 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
-)
+require github.com/mattn/go-sqlite3 v1.14.28

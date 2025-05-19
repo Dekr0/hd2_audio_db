@@ -4,3 +4,14 @@
 **/hda.exe
 **/hda
 **/build
+**/build_**
+**/database
+**/wwiser.ini
+**/wwiser.pyz
+**/log.txt
+**/reverse
+**/wwiser.log
+**/*.xml
+**/*.bnk
+**/*.error
+wwnames.db3

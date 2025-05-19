@@ -1,21 +1,24 @@
 {
-    "fire_behind_start_1": "14472229",
-    "fire_behind_start_2": "86633719",
-    "fire_behind_start_3": "153568788",
-    "fire_behind_start_4": "715210678",
-
-    "fire_behind_loop_1": "229645018",
-    "fire_behind_loop_2": "194258528",
-    "fire_behind_loop_3": "264675387",
-    "fire_behind_loop_4": "547478357",
-
-    "impact_start_1": "1004507351",
-    "impact_start_2": "536635763",
-    "impact_start_3": "413460094",
-    "impact_start_4": "100470324",
-
-    "impact_end_1": "185259318",
-    "impact_end_2": "778838883",
-    "impact_end_3": "246409994",
-    "impact_end_4": "165622355"
+    "version": 1,
+    "sources": {
+        "strafing_run_transient_start_01": "14472229",
+        "strafing_run_transient_start_02": "86633719",
+        "strafing_run_transient_start_03": "153568788",
+        "strafing_run_transient_start_04": "715210678",
+    
+        "strafing_run_transient_loop_01": "229645018",
+        "strafing_run_transient_loop_02": "194258528",
+        "strafing_run_transient_loop_03": "264675387",
+        "strafing_run_transient_loop_04": "547478357",
+    
+        "strafing_run_impact_start_1": "1004507351",
+        "strafing_run_impact_start_2": "536635763",
+        "strafing_run_impact_start_3": "413460094",
+        "strafing_run_impact_start_4": "100470324",
+    
+        "strafing_run_impact_end_1": "185259318",
+        "strafing_run_impact_end_2": "778838883",
+        "strafing_run_impact_end_3": "246409994",
+        "strafing_run_impact_end_4": "165622355"
+    }
 }

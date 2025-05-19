@@ -1,0 +1,50 @@
+{
+    "version": 1,
+    "sources": {
+        "amr_shell_eject_01": "407310262",
+        "amr_shell_eject_02": "276231232",
+        "amr_shell_eject_03": "760146779",
+        "amr_shell_eject_04": "989834962",
+        "amr_shell_eject_05": "596132438",
+
+        "amr_npc_transient_tail_close_01": "458926136",
+        "amr_npc_transient_tail_close_02": "563092254",
+        "amr_npc_transient_tail_close_03": "1043464505",
+        "amr_npc_transient_tail_close_04": "207681903",
+        "amr_npc_transient_tail_close_05": "837221041",
+
+        "amr_plr_transient_mech_01": "171011462",
+        "amr_plr_transient_mech_02": "678196601",
+        "amr_plr_transient_mech_03": "305807060",
+        "amr_plr_transient_mech_04": "553167497",
+        "amr_plr_transient_mech_05": "1014728585",
+
+        "amr_exp_01": "1038831131",
+        "amr_exp_02": "1012273532",
+        "amr_exp_03": "442730921",
+        "amr_exp_04": "400408848",
+        "amr_exp_05": "900395835",
+
+        "amr_unknown_mech_sfx_01": "634671136",
+        "amr_unknown_mech_sfx_02": "754205273",
+        "amr_unknown_mech_sfx_03": "730564842",
+        "amr_unknown_mech_sfx_04": "500048727",
+        "amr_unknown_mech_sfx_05": "345530501",
+
+        "amr_mag_attach_01": "751960990",
+        "amr_mag_attach_02": "555028868",
+        "amr_mag_attach_03": "225194859",
+
+        "amr_mag_release_01": "1037011062",
+        "amr_mag_release_02": "89634013",
+        "amr_mag_release_03": "373041401",
+
+        "amr_bolt_forward_01": "28059866",
+        "amr_bolt_forward_02": "720134671",
+        "amr_bolt_forward_03": "149615026",
+
+        "amr_bolt_backward_01": "920827404",
+        "amr_bolt_backward_02": "694452004",
+        "amr_bolt_backward_03": "129990826"
+    }
+}
