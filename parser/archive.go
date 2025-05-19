@@ -31,7 +31,7 @@ func ParseArchiveHeader(a *Archive, r *io.Reader) {
 	a.NumTypes = r.U32Unsafe()
 	a.NumFiles = r.U32Unsafe()
 	a.Unknown = r.U32Unsafe()
-	r.ReadUnsafe(a.Unk4Data[:])
+	r.ReadFullUnsafe(a.Unk4Data[:])
 	a.AssetTypeCnts = make([]AssetTypeCnt, a.NumTypes, a.NumTypes)
 	for i := range a.AssetTypeCnts {
 		r.U64Unsafe()
@@ -50,7 +50,7 @@ func ParseArchiveHeader(a *Archive, r *io.Reader) {
 
 func ParseArchiveHeaderCache(a *Archive, r *io.Reader) {
 	data := make([]byte, 72, 72)
-	r.ReadUnsafe(data)
+	r.ReadFullUnsafe(data)
 
 	ir := io.NewInPlaceReader(data, io.ByteOrder)
 	if ir.U32Unsafe() != MagicValue {
@@ -64,7 +64,7 @@ func ParseArchiveHeaderCache(a *Archive, r *io.Reader) {
 
 	size := a.NumTypes * (sizeOfAssetCnt + 16)
 	data = make([]byte, size, size)
-	r.ReadUnsafe(data)
+	r.ReadFullUnsafe(data)
 
 	ir = io.NewInPlaceReader(data, io.ByteOrder)
 	for i := range a.AssetTypeCnts {
@@ -98,7 +98,7 @@ func ParseAssetHeadersCachePerThread(a *Archive, r *io.Reader) {
 			lower := head * sizeOfAssetHeader
 			upper := tail * sizeOfAssetHeader
 			data := make([]byte, upper-lower, upper-lower)
-			r.ReadUnsafe(data)
+			r.ReadFullUnsafe(data)
 			r := io.NewInPlaceReader(data, io.ByteOrder)
 			w.Add(1)
 			go parseAssetHeader(&w, r, head, tail, a)
@@ -106,7 +106,7 @@ func ParseAssetHeadersCachePerThread(a *Archive, r *io.Reader) {
 		w.Wait()
 	} else {
 		data := make([]byte, a.NumFiles*sizeOfAssetHeader, a.NumFiles*sizeOfAssetHeader)
-		r.ReadUnsafe(data)
+		r.ReadFullUnsafe(data)
 		r := io.NewInPlaceReader(data, io.ByteOrder)
 		for i := range a.NumFiles {
 			a.Headers[i].FileID = r.U64Unsafe()
@@ -134,7 +134,7 @@ func ParseAssetHeadersCachePerThread(a *Archive, r *io.Reader) {
 func ParseAssetHeaders(a *Archive, r *io.Reader) {
 	if MaxParser > 1 && MaxParser < a.NumFiles {
 		data := make([]byte, a.NumFiles*80, a.NumFiles*80)
-		r.ReadUnsafe(data)
+		r.ReadFullUnsafe(data)
 		var w sync.WaitGroup
 		base := a.NumFiles / MaxParser
 		prev := uint32(0)
@@ -156,7 +156,7 @@ func ParseAssetHeaders(a *Archive, r *io.Reader) {
 		w.Wait()
 	} else {
 		data := make([]byte, a.NumFiles * sizeOfAssetHeader, a.NumFiles * sizeOfAssetHeader)
-		r.ReadUnsafe(data)
+		r.ReadFullUnsafe(data)
 		r := io.NewInPlaceReader(data, io.ByteOrder)
 		for i := range a.NumFiles {
 			a.Headers[i].FileID = r.U64Unsafe()

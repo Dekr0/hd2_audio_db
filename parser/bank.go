@@ -64,7 +64,7 @@ func ParseBank(r *wio.Reader, end uint64) *HIRC {
 	var size uint32
 	var err error
 	for r.Tell() <= uint(end) {
-		err = r.Read(tag)
+		err = r.ReadFull(tag)
 		if err != nil {
 			if err == io.EOF {
 				break
