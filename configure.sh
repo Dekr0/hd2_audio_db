@@ -1,6 +1,6 @@
-export HD2DATA="/mnt/Program Files/Steam/steamapps/common/Helldivers 2/data"
+export DATA="/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
 export CGO_ENABLE=1
-export GOOSE_DBSTRING="database_build_15016"
+export GOOSE_DBSTRING="build_15016"
 export GOOSE_MIGRATION_DIR="sql/schema"
 export GOOSE_DRIVER="sqlite3"
 
@@ -17,8 +17,8 @@ config() {
 }
 
 extractBnk() {
-    local archiveId="${1:-}"
-    go run . -extract-bank=$archiveId -data=$HD2DATA
+    local aid="${1:-}"
+    go run . -extract-bank=$aid -data=$DATA
 }
 
 cleanXML() {
@@ -49,6 +49,31 @@ generate() {
     go run . -table-archive-all >> log.txt
     go run . -table-bank >> log.txt
     go run . -table-hierarchy-object >> log.txt
+}
+
+Test() {
+    if [ -e $GOOSE_DBSTRING ]; then
+        rm $GOOSE_DBSTRING
+    fi
+    if [ -e db/$GOOSE_DBSTRING ]; then
+        rm db/$GOOSE_DBSTRING
+    fi
+    goose up
+    go clean --testcache
+    mv $GOOSE_DBSTRING db
+    go test ./db -v -run TestGenerate
+}
+
+SetupTest() {
+    if [ -e $GOOSE_DBSTRING ]; then
+        rm $GOOSE_DBSTRING
+    fi
+    if [ -e db/$GOOSE_DBSTRING ]; then
+        rm db/$GOOSE_DBSTRING
+    fi
+    goose up
+    go clean --testcache
+    mv $GOOSE_DBSTRING db
 }
 
 createView() {
