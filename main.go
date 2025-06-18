@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	insertArchive := flag.Bool(
 		"insert_archive",
 		false, 
@@ -85,7 +86,7 @@ func main() {
 	}
 
 	if *generate {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 60)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 360)
 		defer cancel()
 		if err := db.Generate(ctx, *data); err != nil {
 			slog.Error(

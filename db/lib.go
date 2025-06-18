@@ -144,7 +144,7 @@ func Generate(ctx context.Context, data string) error {
 	}
 	defer c.Close()
 
-	timeout, cancel := context.WithTimeout(ctx, time.Second * 32)
+	timeout, cancel := context.WithTimeout(ctx, time.Second * 360)
 	defer cancel()
 
 	q := database.New(c)
@@ -327,6 +327,9 @@ func parseBanks(
 				)
 				break
 			}
+		}
+		if path == "" {
+			path = fmt.Sprintf("bank_%d_%s", a.Headers[b].FileID, aid)
 		}
 
 		h := &a.Headers[b]
