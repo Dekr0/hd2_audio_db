@@ -1,6 +1,6 @@
-export DATA="/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+export DATA="/mnt/d/Program Files/Steam/steamapps/common/Helldivers 2/data"
 export CGO_ENABLE=1
-export GOOSE_DBSTRING="build_15016"
+export GOOSE_DBSTRING="build_15314"
 export GOOSE_MIGRATION_DIR="sql/schema"
 export GOOSE_DRIVER="sqlite3"
 
