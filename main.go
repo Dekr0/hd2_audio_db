@@ -42,6 +42,16 @@ func main() {
 		"a sound bank name. Multi-selective is enable. Use `Tab` to select / " +
 		"deselect",
 	)
+	insertArchiveDeadline := flag.Uint64(
+		"insert_archive_deadline",
+		12,
+		"deadline (in second) for generating archive table in the database",
+	)
+	generationDeadline := flag.Uint64(
+		"generate_deadline",
+		60,
+		"deadline for generating database in seconds",
+	)
 	data := flag.String("data", "", "")
 	dest := flag.String("dest", "", "")
 
@@ -76,7 +86,7 @@ func main() {
 	}
 
 	if *insertArchive {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 12)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second * time.Duration(*insertArchiveDeadline))
 		defer cancel()
 		if err := db.WriteArchives(ctx, *data); err != nil {
 			slog.Error("Failed to insert records into archive table", "error", err)
@@ -86,7 +96,7 @@ func main() {
 	}
 
 	if *generate {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 360)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second * time.Duration(*generationDeadline))
 		defer cancel()
 		if err := db.Generate(ctx, *data); err != nil {
 			slog.Error(
