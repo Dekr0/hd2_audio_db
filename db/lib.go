@@ -144,9 +144,6 @@ func Generate(ctx context.Context, data string) error {
 	}
 	defer c.Close()
 
-	timeout, cancel := context.WithTimeout(ctx, time.Second * 360)
-	defer cancel()
-
 	q := database.New(c)
 	archives, err := q.GetAllArchive(ctx)
 	if err != nil {
@@ -160,7 +157,7 @@ func Generate(ctx context.Context, data string) error {
 	soundInsert := []database.InsertSoundParams{}
 	for _, archive := range archives {
 		select {
-		case <- timeout.Done():
+		case <- ctx.Done():
 			return ctx.Err()
 		default:
 			localAssetInsert, localBankInsert, localHircInsert, localSoundInsert := gather(
