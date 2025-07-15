@@ -24,6 +24,11 @@ func main() {
 		"Populate records for `asset`, `soundbank`, `hierarchy`, and `sound`" +
 		" table.",
 	)
+	exportId := flag.Bool(
+		"export_id",
+		false,
+		"Export all possible hierarchy IDs and source IDs in every sound bank.",
+	)
 	extractAllSoundbank := flag.Bool(
 		"extract_all_soundbank",
 		false,
@@ -51,6 +56,11 @@ func main() {
 		"generate_deadline",
 		60,
 		"deadline for generating database in seconds",
+	)
+	exportIdDeadline := flag.Uint64(
+		"export_id_deadline",
+		4,
+		"deadline for export IDs in seconds",
 	)
 	data := flag.String("data", "", "")
 	dest := flag.String("dest", "", "")
@@ -100,10 +110,20 @@ func main() {
 		defer cancel()
 		if err := db.Generate(ctx, *data); err != nil {
 			slog.Error(
-				"Populate records for `asset`, `soundbank`, `hierarchy`, and " + 
+				"Failed to populate records for `asset`, `soundbank`, `hierarchy`, and " + 
 				"`sound` table.",
 				"error", err,
 			)
+			os.Exit(1)
+		}
+		os.Exit(0)
+	}
+
+	if *exportId {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second * time.Duration(*exportIdDeadline))
+		defer cancel()
+		if err := db.ExportID(ctx); err != nil {
+			slog.Error( "Failed to export all IDs", "error", err) 
 			os.Exit(1)
 		}
 		os.Exit(0)
@@ -156,4 +176,3 @@ func main() {
 
 	flag.Usage()
 }
-
