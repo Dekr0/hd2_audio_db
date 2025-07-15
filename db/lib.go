@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"dekr0/hd2_audio_db/internal/database"
+	database "dekr0/hd2_audio_db/internal/complete"
 	wio "dekr0/hd2_audio_db/io"
 	"dekr0/hd2_audio_db/parser"
 
@@ -32,6 +32,12 @@ var HircMetric = 0
 
 func conn() (*sql.DB, error) {
 	p := os.Getenv("GOOSE_DBSTRING")
+	db, err := sql.Open("sqlite3", p)
+	return db, err
+}
+
+func connV(v string) (*sql.DB, error) {
+	p := os.Getenv(v)
 	db, err := sql.Open("sqlite3", p)
 	return db, err
 }
@@ -584,7 +590,7 @@ func exportSoundbanks(
 	for i, b := range a.SoundBnks {
 		bh = &a.Headers[b]
 
-		var path string = fmt.Sprintf("Unknown %d.bnk", i)
+		var path string = fmt.Sprintf("%d.bnk", i)
 
 		for _, w := range a.Deps {
 			wh = &a.Headers[w]
@@ -615,7 +621,6 @@ func exportSoundbanks(
 				break
 			}
 		}
-
 
 		sf, err := os.Open(p)
 		if err != nil {

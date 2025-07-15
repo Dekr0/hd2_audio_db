@@ -2,7 +2,7 @@ package db
 
 import (
 	"context"
-	"dekr0/hd2_audio_db/internal/database"
+	database "dekr0/hd2_audio_db/internal/complete"
 	wio "dekr0/hd2_audio_db/io"
 	"dekr0/hd2_audio_db/parser"
 	"io"
