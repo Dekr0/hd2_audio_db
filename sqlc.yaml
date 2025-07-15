@@ -1,9 +1,16 @@
 version: "2"
 sql:
-  - schema: "sql/schema"
-    queries: "sql/queries"
+  - schema: "sql/schema/complete"
+    queries: "sql/queries/complete"
     engine: "sqlite"
     gen:
       go:
-        out: "internal/database"
+        out: "internal/complete"
         emit_prepared_queries: true 
+  - schema: "sql/schema/id"
+    queries: "sql/queries/id"
+    engine: "sqlite"
+    gen:
+      go:
+        out: "internal/id"
+        emit_prepared_queries: true
