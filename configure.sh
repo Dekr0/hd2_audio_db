@@ -2,7 +2,7 @@ export DATA="/mnt/d/Program Files/Steam/steamapps/common/Helldivers 2/data"
 export CGO_ENABLE=1
 export GOOSE_DRIVER="sqlite3"
 
-VERSION=15314
+VERSION=15637
 
 config() {
     go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
