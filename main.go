@@ -54,7 +54,7 @@ func main() {
 	)
 	generationDeadline := flag.Uint64(
 		"generate_deadline",
-		60,
+		560,
 		"deadline for generating database in seconds",
 	)
 	exportIdDeadline := flag.Uint64(
@@ -135,7 +135,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 16)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second * 120)
 		defer cancel()
 		if err := db.ExportAllSoundbank(ctx, *data, *dest); err != nil {
 			slog.Error("Failed to extract all sound banks", "error", err)
