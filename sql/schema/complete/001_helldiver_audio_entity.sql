@@ -44,7 +44,6 @@ CREATE TABLE hierarchy (
     label TEXT NOT NULL,
     tags TEXT NOT NULL,
     description TEXT NOT NULL,
-    PRIMARY KEY (aid, fid, hid, type),
     FOREIGN KEY (aid) REFERENCES archive(aid),
     FOREIGN KEY (fid) REFERENCES asset(fid)
 );
@@ -54,7 +53,6 @@ CREATE TABLE sound (
     fid INTEGER NOT NULL,
     hid INTEGER NOT NULL,
     sid INTEGER NOT NULL,
-    PRIMARY KEY (aid, fid, hid),
     FOREIGN KEY (aid) REFERENCES archive(aid),
     FOREIGN KEY (fid) REFERENCES asset(fid),
     FOREIGN KEY (hid) REFERENCES hierarchy(hid)
