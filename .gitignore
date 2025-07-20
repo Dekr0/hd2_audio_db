@@ -14,4 +14,5 @@
 **/*.xml
 **/*.bnk
 **/*.error
+**/id_1*
 wwnames.db3
