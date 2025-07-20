@@ -25,7 +25,7 @@ import (
 )
 
 var MaxDirReader = 4
-var MaxArchiveReder = 2
+var MaxArchiveReder = 4
 var MaxBankParser = 4
 var MaxBankWriter = 4
 var HircMetric = 0
@@ -166,6 +166,7 @@ func Generate(ctx context.Context, data string) error {
 		case <- ctx.Done():
 			return ctx.Err()
 		default:
+			slog.Info(fmt.Sprintf("Extracting information from archive %s", archive.Aid))
 			localAssetInsert, localBankInsert, localHircInsert, localSoundInsert := gather(
 				filepath.Join(data, archive.Aid),
 				archive.Aid,
@@ -342,6 +343,7 @@ func parseBanks(
 		bankInsert[i].Name = ""
 		bankInsert[i].Categories = ""
 
+		slog.Info(fmt.Sprintf("Parsing sound bank %s (file id %d)", path, h.FileID))
 		select {
 		case sem <- struct{}{}:
 			w.Add(1)
@@ -522,7 +524,7 @@ func ExportAllSoundbank(ctx context.Context, data string, dest string) error {
 		return err
 	}
 
-	timeout, cancel := context.WithTimeout(ctx, time.Second * 8)
+	timeout, cancel := context.WithTimeout(ctx, time.Second * 120)
 	defer cancel()
 	var w sync.WaitGroup
 
@@ -697,7 +699,7 @@ func exportSoundbank(
 		)
 		return
 	}
-	data[0x08] = 0x8D
+	data[0x08] = 0x9A
 	data[0x09] = 0x00
 	data[0x0A] = 0x00
 	data[0x0B] = 0x00
