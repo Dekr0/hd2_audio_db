@@ -4,6 +4,7 @@ import (
 	"bytes"
 	wio "dekr0/hd2_audio_db/io"
 	"io"
+	"log/slog"
 )
 
 type HircType uint8
@@ -122,7 +123,9 @@ func parseHIRC(r *wio.Reader) *HIRC {
 		case HircTypeMusicSegment:
 			parseMusicSegment(r, size, i, hirc.Hierarchy)
 		case HircTypeMusicTrack:
-			hirc.Sound = parseMusicTrack(r, size, i, hirc.Hierarchy, hirc.Sound)
+			if err := r.RelSeek(int(size)); err != nil {
+				slog.Error("Failed to skip music track", "error", err)
+			}
 		case HircTypeMusicSwitchCntr:
 			parseMusicSwitchCntr(r, size, i, hirc.Hierarchy)
 		case HircTypeMusicRanSeqCntr:
@@ -186,6 +189,7 @@ func parseBankSourceData(r *wio.Reader, sound *Sound) {
 	sound.PluginID = r.U32Unsafe()
 	sound.StreamType = r.U8Unsafe()
 	sound.SourceID = r.U32Unsafe()
+	r.U32Unsafe() // cache ID 150; 141 don't have this
 	sound.InMemoryMediaSize = r.U32Unsafe()
 	sound.SourceBits = r.U8Unsafe()
 	sound.PluginParamSize = 0
@@ -207,7 +211,7 @@ func parseBaseParam(r *wio.Reader) uint32 {
 	uniqueNumFX := r.U8Unsafe()
 	if uniqueNumFX > 0 {
 		r.RelSeekUnsafe(1)
-		r.RelSeekUnsafe(int(uniqueNumFX) * 7)
+		r.RelSeekUnsafe(int(uniqueNumFX) * 6) // v150 is 6; v141 is 7
 	}
 
 	// FxChunkMetadata
@@ -215,7 +219,11 @@ func parseBaseParam(r *wio.Reader) uint32 {
 	uniqueNumFXMetadata := r.U8Unsafe()
 	r.RelSeekUnsafe(int(uniqueNumFXMetadata) * 6)
 
-	r.RelSeekUnsafe(1 + 4) // BitOverrideAttachmentParams + OverrideBusId
+	// v141
+	// r.RelSeekUnsafe(1 + 4) // BitOverrideAttachmentParams + OverrideBusId
+
+	// v150
+	r.RelSeekUnsafe(4) // BitOverrideAttachmentParams + OverrideBusId
 
 	return r.U32Unsafe()
 }
