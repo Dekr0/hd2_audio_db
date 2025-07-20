@@ -328,7 +328,7 @@ func TestExportSoundbanks(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second * 360)
 	defer cancel()
 
-	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+	data := "/mnt/d/Program Files/Steam/steamapps/common/Helldivers 2/data"
 
 	dest := "output"
 	stat, err := os.Lstat(dest)
@@ -350,12 +350,12 @@ func TestExportSoundbanks(t *testing.T) {
 
 	exportSoundbanks(
 		nil, ctx,
-		filepath.Join(data, "e75f556a740e00c9"), "output",
+		filepath.Join(data, "a66d7cf238070ca7"), "output",
 	)
 }
 
 func TestSoundbanksTUI(t *testing.T) {
-	data := "/mnt/D/Program Files/Steam/steamapps/common/Helldivers 2/data"
+	data := "/mnt/d/Program Files/Steam/steamapps/common/Helldivers 2/data"
 
 	if err := ExportSoundbanksTUI(context.Background(), data, "output"); 
 	   err != nil {
